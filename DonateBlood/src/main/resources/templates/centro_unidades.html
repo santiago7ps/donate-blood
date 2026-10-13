@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Unidades</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h2>CENTRO</h2>
+
+    <div class="menu">
+
+        <a href="/centro/unidades" class="activo">🩸 Unidades disponibles</a>
+        <a href="/centro/encargos">📦 Realizar encargos</a>
+
+        <a href="/" class="salir">🚪 Salir</a>
+
+    </div>
+
+</div>
+
+<div class="contenido">
+
+    <h1>Unidades disponibles</h1>
+
+    <table>
+        <tr>
+            <th>Tipo de sangre</th>
+            <th>Cantidad</th>
+        </tr>
+
+        <tr th:each="unidad : ${unidades}">
+            <td th:text="${unidad.key}"></td>
+            <td th:text="${unidad.value}"></td>
+        </tr>
+    </table>
+
+</div>
+
+</body>
+</html>

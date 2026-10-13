@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil</title>
+
+    <link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>DONANTE</h2>
+
+    <div class="menu">
+        <a href="/agendarCita">📅 Agendar cita</a>
+        <a href="/verCitas">🩸 Mis citas</a>
+        <a href="/perfilDonante" class="activo">👤 Mi perfil</a>
+        <a href="/" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+    <h1 class="titulo">Mi Perfil</h1>
+
+    <div class="card-perfil">
+
+        <div class="perfil-img">
+            <img src="/img/PerfilDefinitivo.jpeg" alt="Perfil">
+        </div>
+
+        <div class="perfil-info">
+
+            <div class="fila">
+                <span class="icono">👤</span>
+                <strong>Nombre:</strong>
+                <span th:text="${usuario.nombre}"></span>
+            </div>
+
+            <div class="fila">
+                <span class="icono">👤</span>
+                <strong>Usuario:</strong>
+                <span th:text="${usuario.username}"></span>
+            </div>
+
+            <div class="fila">
+                <span class="icono">🆔</span>
+                <strong>Numero de documento:</strong>
+                <span th:text="${usuario.documento }"></span>
+            </div>
+
+            <div class="fila">
+                <span class="icono">✉️</span>
+                <strong>Correo:</strong>
+                <span th:text="${usuario.email}"></span>
+            </div>
+
+            <div class="fila">
+                <span class="icono">📞</span>
+                <strong>Teléfono:</strong>
+                <span th:text="${usuario.numPhone}"></span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

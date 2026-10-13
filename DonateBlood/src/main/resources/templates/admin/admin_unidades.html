@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+
+<link rel="stylesheet" href="/css/sidebar.css">
+
+</head>
+<body>
+
+<div class="sidebar">
+<h2>ADMIN</h2>
+<div class="menu">
+<a href="/admin/unidades" class="activo">🩸 Unidades</a>
+<a href="/admin/modificar">✏️ Modificar</a>
+<a href="/admin/pedidos">📦 Pedidos</a>
+<a href="/admin/misCitas">📅 Citas</a>
+<a href="/admin/agendar">➕ Agendar</a>
+<a href="/" class="salir">🚪 Salir</a>
+</div>
+</div>
+
+<div class="contenido">
+<h1>Unidades</h1>
+
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Cantidad</th>
+</tr>
+</thead>
+
+<tbody>
+<tr th:each="u : ${unidades}">
+<td th:text="${u.key}"></td>
+<td th:text="${u.value}"></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+</body>
+</html>

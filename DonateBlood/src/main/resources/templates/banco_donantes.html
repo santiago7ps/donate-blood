@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donantes Disponibles</title>
+    <link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+<div class="sidebar">
+    <h2>BANCO</h2>
+    <div class="menu">
+        <a href="/banco/unidades">🩸 Unidades disponibles</a>
+        <a href="/banco/modificar">✏️ Modificar unidades</a>
+        <a href="/banco/citas">📅 Ver citas</a>
+        <a href="/" class="salir">🚪 Salir</a>
+    </div>
+</div>
+<div class="contenido">
+    <h1>Donantes Disponibles</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre donante</th>
+                <th>Tipo de sangre</th>
+                <th>Centro médico</th>
+                <th>Fecha donación</th>
+                <th>Cantidad (ml)</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="donante : ${donantes}">
+                <td th:text="${donante.donante}"></td>
+                <td th:text="${donante.tipoSangre}"></td>
+                <td th:text="${donante.centroMedico}"></td>
+                <td th:text="${donante.fecha}"></td>
+                <td th:text="${donante.cantidadMl}"></td>
+                <td th:text="${donante.estado}"></td>
+            </tr>
+            <tr th:if="${donantes.empty}">
+                <td colspan="6" style="text-align:center; padding: 16px;">No hay donantes disponibles para este filtro.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

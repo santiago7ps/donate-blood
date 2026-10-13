@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Centro Médico</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h2>CENTRO</h2>
+
+    <div class="menu">
+
+        <a href="/centro/unidades">🩸 Unidades disponibles</a>
+        <a href="/centro/encargos">📦 Realizar encargos</a>
+
+        <a href="/" class="salir">🚪 Salir</a>
+
+    </div>
+
+</div>
+
+<div class="contenido">
+
+    <h1>Panel Centro Médico</h1>
+    <p>Consulta el stock del banco de sangre y realiza tus encargos.</p>
+
+    <div class="quick-links">
+
+        <a href="/centro/unidades" class="quick-card">
+            <div class="quick-icon">🩸</div>
+            <strong>Unidades disponibles</strong>
+            <span>Consulta el stock del banco de sangre</span>
+        </a>
+
+        <a href="/centro/encargos" class="quick-card">
+            <div class="quick-icon">📦</div>
+            <strong>Realizar encargos</strong>
+            <span>Solicita unidades de sangre para tu centro</span>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

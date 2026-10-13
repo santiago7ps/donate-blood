@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Banco</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <h2>BANCO</h2>
+
+    <div class="menu">
+
+         <a href="/banco/unidades">🩸 Unidades disponibles</a>
+         <a href="/banco/modificar">✏️ Modificar unidades</a>
+         <a href="/banco/citas">📅 Ver citas</a>
+         <a href="/" class="salir">🚪 Salir</a>
+
+    </div>
+
+</div>
+
+<div class="contenido">
+
+    <h1>Panel Banco de Sangre</h1>
+    <p>Gestiona el inventario de unidades y las citas de donación desde aquí.</p>
+
+    <div class="quick-links">
+
+        <a href="/banco/unidades" class="quick-card">
+            <div class="quick-icon">🩸</div>
+            <strong>Unidades disponibles</strong>
+            <span>Consulta el stock actual por tipo de sangre</span>
+        </a>
+
+        <a href="/banco/modificar" class="quick-card">
+            <div class="quick-icon">✏️</div>
+            <strong>Modificar unidades</strong>
+            <span>Registra entradas de sangre al inventario</span>
+        </a>
+
+        <a href="/banco/citas" class="quick-card">
+            <div class="quick-icon">📅</div>
+            <strong>Ver citas</strong>
+            <span>Consulta y finaliza citas de donación</span>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

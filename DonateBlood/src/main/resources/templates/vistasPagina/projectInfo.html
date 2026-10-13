@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información del proyecto | Donate Blood</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/info.css}">
+</head>
+<body class="info-page">
+<nav class="info-nav">
+    <div class="info-nav-inner">
+        <a class="info-brand" href="/"><span class="mark"><i data-lucide="droplets"></i></span><span>Donate<b>Blood</b></span></a>
+        <ul class="info-links">
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/info" class="active">Información</a></li>
+            <li><a href="https://api.whatsapp.com/send?phone=573043717467" target="_blank" rel="noopener">Contáctanos</a></li>
+            <li><a href="/register?rol=ROLE_USER" class="nav-cta">Inscríbete aquí</a></li>
+        </ul>
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="hero-inner">
+        <span class="kicker"><i data-lucide="heart-pulse"></i> SOBRE EL PROYECTO</span>
+        <h1>Donar sangre es <em>salvar vidas</em> en Cartagena</h1>
+        <p>Donate Blood conecta a hospitales, bancos de sangre y donantes para que ninguna cirugía se pospone por falta de suministros.</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="/register?rol=ROLE_USER">Quiero donar <i data-lucide="arrow-right"></i></a>
+            <a class="btn btn-ghost" href="#proyecto">Conocer más</a>
+        </div>
+    </div>
+</header>
+
+<section class="stats">
+    <div class="stat reveal"><span class="ico"><i data-lucide="users"></i></span><div><strong>3 vidas</strong><span>pueden salvarse con una sola unidad</span></div></div>
+    <div class="stat reveal"><span class="ico"><i data-lucide="building-2"></i></span><div><strong>Hospitales y bancos</strong><span>conectados en una misma red</span></div></div>
+    <div class="stat reveal"><span class="ico"><i data-lucide="activity"></i></span><div><strong>Tiempo real</strong><span>disponibilidad de sangre visible</span></div></div>
+</section>
+
+<section class="section" id="proyecto">
+    <div class="section-head reveal">
+        <span class="eyebrow">EL PROYECTO</span>
+        <h2>Tecnología al servicio de la solidaridad</h2>
+        <p>Una plataforma web pensada para resolver un problema real de la ciudad.</p>
+    </div>
+    <div class="cards-3">
+        <article class="card reveal">
+            <span class="ico"><i data-lucide="help-circle"></i></span>
+            <h3>¿De qué trata?</h3>
+            <p><strong>Donate Blood</strong> surge por la necesidad de mejorar la comunicación entre hospitales, bancos de sangre y donantes en la ciudad de Cartagena. Muchas veces los hospitales no cuentan con suficiente sangre para atender emergencias o cirugías, y eso pone en riesgo la vida de muchos pacientes.</p>
+        </article>
+        <article class="card reveal">
+            <span class="ico"><i data-lucide="lightbulb"></i></span>
+            <h3>¿Por qué se creó?</h3>
+            <p>Para usar la tecnología como herramienta. A través de una aplicación web desarrollada con <strong>HTML y Java</strong>, los donantes se registran, reciben recordatorios y conocen los lugares y fechas para donar, mientras los hospitales ven la disponibilidad de sangre en tiempo real.</p>
+        </article>
+        <article class="card reveal">
+            <span class="ico"><i data-lucide="target"></i></span>
+            <h3>Propósito</h3>
+            <p>Fomentar la solidaridad y crear conciencia sobre la importancia de donar sangre: reducir la escasez, mejorar la atención médica y fortalecer la conexión entre hospitales y bancos de sangre para que más personas donen y se salven más vidas.</p>
+        </article>
+    </div>
+</section>
+
+<section class="vision">
+    <div class="vision-box reveal">
+        <span class="eyebrow">NUESTRA VISIÓN</span>
+        <h2>Ser el puente entre la solidaridad de los ciudadanos y el sistema de salud.</h2>
+        <p>Queremos que en el futuro ninguna cirugía en la ciudad sea pospuesta por falta de suministros, logrando que la cultura de la donación sea parte del día a día de los cartageneros.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head center reveal">
+        <span class="eyebrow">VALORES</span>
+        <h2>Lo que guía cada decisión</h2>
+    </div>
+    <div class="values">
+        <div class="value reveal"><span class="num">01</span><h3>Solidaridad</h3><p>Conectar a quienes quieren ayudar con quienes más lo necesitan.</p></div>
+        <div class="value reveal"><span class="num">02</span><h3>Transparencia</h3><p>Mostrar en tiempo real dónde se necesita más apoyo para que el donante sepa que su aporte es vital.</p></div>
+        <div class="value reveal"><span class="num">03</span><h3>Compromiso</h3><p>Trabajar de la mano con los centros de salud para salvar vidas de forma eficiente.</p></div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head reveal">
+        <span class="eyebrow">DONANTES</span>
+        <h2>¿Quiénes pueden donar?</h2>
+        <p>Donar sangre es un acto sencillo, pero requiere cumplir algunos requisitos básicos para garantizar la seguridad de todos.</p>
+    </div>
+    <div class="donors">
+        <div class="req-list">
+            <div class="req reveal"><span class="ico"><i data-lucide="scale"></i></span><h3>Edad y peso</h3><p>Tener entre 18 y 65 años y pesar más de 50 kg.</p></div>
+            <div class="req reveal"><span class="ico"><i data-lucide="heart-pulse"></i></span><h3>Salud general</h3><p>Sentirse bien el día de la donación y no haber tenido infecciones recientes.</p></div>
+            <div class="req reveal"><span class="ico"><i data-lucide="sparkles"></i></span><h3>Estilo de vida</h3><p>No haberse realizado tatuajes, piercings o cirugías en los últimos 12 meses.</p></div>
+            <div class="req reveal"><span class="ico"><i data-lucide="id-card"></i></span><h3>Identificación</h3><p>Contar con el documento de identidad vigente.</p></div>
+        </div>
+        <aside class="impact reveal">
+            <div class="big">3</div>
+            <h3>El valor de tu donación</h3>
+            <p>Una sola unidad de sangre puede salvar hasta tres vidas. Sus componentes se usan en distintos tratamientos, desde cirugías programadas hasta emergencias en toda la ciudad de Cartagena.</p>
+            <div class="parts"><span>Glóbulos rojos</span><span>Plasma</span><span>Plaquetas</span></div>
+        </aside>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="cta-box reveal">
+        <h2>Tu próxima donación empieza aquí</h2>
+        <p>Crea tu cuenta, agenda tu cita y sé parte de la red que salva vidas.</p>
+        <div class="hero-actions">
+            <a class="btn btn-red" href="/register?rol=ROLE_USER">Inscríbete aquí <i data-lucide="arrow-right"></i></a>
+            <a class="btn btn-ghost" style="color:var(--ink);border-color:var(--line)" href="/">Volver al inicio</a>
+        </div>
+    </div>
+</section>
+
+<footer class="info-footer">
+    <p><b>Proyecto Donate Blood</b> © 2025 · Hecho por: Luis Manuel Miranda, Santiago Pérez, Eliana Villa Real</p>
+</footer>
+
+<script>
+lucide.createIcons();
+const items = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  items.forEach(function (el, i) { el.style.transitionDelay = (i % 3) * 90 + 'ms'; io.observe(el); });
+} else {
+  items.forEach(function (el) { el.classList.add('in'); });
+}
+
+(function () {
+  var nav = document.querySelector('.info-nav');
+  if (!nav) return;
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 10); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+})();
+</script>
+</body>
+</html>

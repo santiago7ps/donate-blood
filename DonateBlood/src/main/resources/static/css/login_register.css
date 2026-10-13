@@ -1,0 +1,37 @@
+:root{--red:#e51b3e;--red-dark:#bb1231;--ink:#121826;--muted:#737b8c;--line:#e7e9ee}
+*{box-sizing:border-box}body{margin:0;font-family:"DM Sans",sans-serif;color:var(--ink)}.auth-page{min-height:100vh;background:#f7f8fa}.auth-shell{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr}.auth-visual{position:relative;padding:48px clamp(35px,7vw,100px);display:flex;flex-direction:column;justify-content:space-between;color:#fff;overflow:hidden;background:radial-gradient(circle at 80% 15%,#bd2946 0,#6f1028 38%,#260710 100%)}.auth-visual:before{content:"";position:absolute;width:550px;height:550px;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-220px;bottom:-190px;box-shadow:0 0 0 80px rgba(255,255,255,.025),0 0 0 160px rgba(255,255,255,.02)}.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:800 21px Manrope;position:relative;z-index:2}.brand>span:last-child span{color:#ff9baa}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#fff;color:var(--red)}.brand-mark svg{width:21px}.visual-content{position:relative;z-index:1;max-width:610px;margin:auto 0}.auth-kicker,.form-kicker{font-size:11px;letter-spacing:.17em;font-weight:800}.auth-kicker{color:#ff9baa}.visual-content h1{font:800 clamp(39px,4.2vw,61px)/1.07 Manrope;letter-spacing:-.045em;margin:17px 0 22px}.visual-content p{max-width:530px;font-size:17px;line-height:1.75;color:rgba(255,255,255,.7)}.quote{display:flex;align-items:center;gap:14px;margin-top:38px;padding:18px 20px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);border-radius:18px;max-width:470px;color:rgba(255,255,255,.85)}.quote svg{width:22px;color:#ff8799;flex:none}.visual-footer{position:relative;z-index:1;font-size:12px;color:rgba(255,255,255,.45);display:flex;gap:9px}.auth-form-wrap{display:grid;place-items:center;padding:40px 28px;background:#fff}.auth-form{width:min(100%,430px)}.form-kicker{color:var(--red)}.auth-form h2{font:800 39px Manrope;letter-spacing:-.035em;margin:10px 0 7px}.subtitle{color:var(--muted);margin-bottom:30px}.field{margin-bottom:20px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}.input-wrap{height:55px;border:1.5px solid var(--line);border-radius:14px;background:#fafbfc;display:flex;align-items:center;padding:0 15px;transition:.2s}.input-wrap:focus-within{border-color:var(--red);background:#fff;box-shadow:0 0 0 4px rgba(229,27,62,.08)}.input-wrap>svg{width:19px;color:#9098a8;margin-right:11px}.input-wrap input{border:0;outline:0;background:transparent;width:100%;font:500 14px "DM Sans";color:var(--ink)}.input-wrap input::placeholder{color:#a2a8b4}.toggle-password{border:0;background:transparent;color:#929aaa;padding:5px;display:grid;place-items:center}.toggle-password svg{width:18px}.submit-btn{width:100%;height:55px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--red),#f53e5d);color:#fff;font-weight:800;box-shadow:0 12px 25px rgba(229,27,62,.2);display:flex;justify-content:center;align-items:center;gap:9px;transition:.2s}.submit-btn:hover{background:linear-gradient(135deg,var(--red-dark),var(--red));transform:translateY(-2px)}.submit-btn svg{width:18px}.divider{display:flex;align-items:center;gap:14px;color:#9aa1ad;font-size:12px;margin:26px 0}.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}.google-btn{height:55px;border:1.5px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;gap:11px;color:var(--ink);text-decoration:none;font-weight:700;font-size:14px;transition:.2s}.google-btn:hover{background:#f8f9fb;border-color:#d6d9e0;transform:translateY(-1px)}.google-logo{width:20px;height:20px;flex:none}.register-copy{text-align:center;color:var(--muted);font-size:13px;margin-top:25px}.register-copy a{color:var(--red);font-weight:800;text-decoration:none}.alert{font-size:13px;border-radius:12px}.alert svg{width:17px}.mobile-brand,.back-home{display:none}@media(max-width:900px){.auth-shell{grid-template-columns:1fr}.auth-visual{display:none}.auth-form-wrap{min-height:100vh}.mobile-brand{display:block;margin-bottom:55px}.dark-brand{color:var(--ink)}.dark-brand .brand-mark{background:#fff0f2}.back-home{display:flex;position:fixed;z-index:5;top:20px;left:22px;align-items:center;gap:7px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:700}.back-home svg{width:16px}}@media(max-width:480px){.auth-form-wrap{padding:35px 20px}.mobile-brand{margin-bottom:45px}.auth-form h2{font-size:34px}}
+
+.register-page{background:#f7f8fa}
+.register-shell{min-height:100vh}
+.register-visual{background:radial-gradient(circle at 80% 12%,#d72f4f 0,#75142d 40%,#25060e 100%)}
+.register-form-wrap{padding:42px 34px}
+.register-form{width:min(100%,620px)}
+.role-selector{margin-bottom:24px}
+.role-selector label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+.role-selector .form-select{height:52px;border:1.5px solid var(--line);border-radius:14px;font:500 14px "DM Sans";color:var(--ink);box-shadow:none}
+.role-selector .form-select:focus{border-color:var(--red);box-shadow:0 0 0 4px rgba(229,27,62,.08)}
+.register-form .alert{margin-bottom:22px;padding:11px 14px}
+.register-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.register-grid .full-width{grid-column:1/-1}
+.register-form-fields .field{margin-bottom:18px}
+.register-form-fields .input-wrap{height:52px}
+.select-wrap{padding-right:10px}
+.select-wrap select{border:0;outline:0;background:transparent;width:100%;font:500 14px "DM Sans";color:var(--ink);appearance:none}
+.select-wrap select:invalid{color:#a2a8b4}
+.register-password-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field-error{display:block;color:#c51634;font-size:11px;font-weight:600;margin:7px 3px 0}
+.register-submit{margin-top:4px}
+.register-benefits{display:grid;gap:12px;margin-top:32px}
+.register-benefits div{display:flex;align-items:center;gap:12px;font-size:14px;color:rgba(255,255,255,.78)}
+.register-benefits svg{width:20px;color:#ff91a0;flex:none}
+@media(max-width:900px){
+  .register-form-wrap{padding:40px 28px}
+}
+@media(max-width:620px){
+  .register-grid,.register-password-grid{grid-template-columns:1fr}
+  .register-grid .full-width{grid-column:auto}
+}
+@media(max-width:480px){
+  .register-form-wrap{padding:35px 20px}
+  .register-form h2{font-size:34px}
+}

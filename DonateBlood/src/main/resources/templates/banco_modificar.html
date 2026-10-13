@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Modificar</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>BANCO</h2>
+
+    <div class="menu">
+        <a href="/banco/unidades">🩸 Unidades disponibles</a>
+        <a href="/banco/modificar" class="activo">✏️ Modificar unidades</a>
+        <a href="/banco/citas">📅 Ver citas</a>
+        <a href="/" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+<h1>Agregar unidades</h1>
+
+<p th:if="${mensaje}" th:text="${mensaje}" class="success"></p>
+<p th:if="${error}" th:text="${error}" class="error"></p>
+
+<form action="/banco/modificar" method="POST">
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+<label>Tipo de sangre:</label><br>
+<select name="tipo">
+    <option value="" disabled selected>Seleccione tipo:</option>
+    <option th:each="t : ${tipos}"
+            th:value="${t}"
+            th:text="${t}">
+    </option>
+</select>
+
+<br><br>
+
+<label>Cantidad:</label><br>
+<input type="number" name="cantidad" min="1" required>
+
+<br><br>
+
+<button type="submit">Guardar</button>
+
+</form>
+
+</div>
+
+</body>
+</html>

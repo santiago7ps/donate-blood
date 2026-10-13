@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Citas Banco</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>BANCO</h2>
+    <div class="menu">
+        <a href="/banco/unidades">🩸 Unidades disponibles</a>
+        <a href="/banco/modificar">✏️ Modificar unidades</a>
+        <a href="/banco/citas" class="activo">📅 Ver citas</a>
+        <a href="/" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+<h2>🩸 Citas Agendadas</h2>
+
+<form method="get" action="/banco/citas" style="margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+    <div>
+        <label for="tipo">Tipo de sangre</label><br>
+        <select id="tipo" name="tipo" style="min-width: 160px;">
+            <option value="" th:selected="${tipoSeleccionado == null || tipoSeleccionado == ''}">Todos</option>
+            <option value="A+" th:selected="${tipoSeleccionado == 'A+'}">A+</option>
+            <option value="A-" th:selected="${tipoSeleccionado == 'A-' }">A-</option>
+            <option value="B+" th:selected="${tipoSeleccionado == 'B+'}">B+</option>
+            <option value="B-" th:selected="${tipoSeleccionado == 'B-' }">B-</option>
+            <option value="AB+" th:selected="${tipoSeleccionado == 'AB+'}">AB+</option>
+            <option value="AB-" th:selected="${tipoSeleccionado == 'AB-' }">AB-</option>
+            <option value="O+" th:selected="${tipoSeleccionado == 'O+'}">O+</option>
+            <option value="O-" th:selected="${tipoSeleccionado == 'O-' }">O-</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="cedula">Buscar por usuario</label><br>
+        <input id="cedula" name="cedula" type="text" placeholder="Nombre de usuario" th:value="${cedulaBusqueda}" style="min-width: 220px;" />
+    </div>
+    <div>
+        <button type="submit">Buscar</button>
+        <a href="/banco/citas" style="margin-left: 10px;">Limpiar</a>
+    </div>
+</form>
+
+<p style="margin-bottom: 12px;"><strong>Total de citas mostradas:</strong> <span th:text="${contador}">0</span></p>
+
+<div th:if="${#lists.isEmpty(citas)}" class="estado-vacio">
+    <span class="estado-vacio-icono">🩸</span>
+    <p>No hay citas registradas</p>
+</div>
+
+<table th:unless="${#lists.isEmpty(citas)}">
+<tr>
+<th>Nombre</th>
+<th>Fecha</th>
+<th>Hora</th>
+<th>Lugar</th>
+<th>Tipo de Sangre</th>
+<th>Estado</th>
+<th>Acción</th>
+</tr>
+
+<tr th:each="cita : ${citas}">
+<td th:text="${cita.nombre}"></td>
+<td th:text="${cita.fecha}"></td>
+<td th:text="${cita.hora}"></td>
+<td th:text="${cita.lugar}"></td>
+<td th:text="${cita.tipoSangre}"></td>
+
+<td>
+    <span th:if="${cita.estado == 'PENDIENTE'}" class="estado pendiente">PENDIENTE</span>
+    <span th:if="${cita.estado == 'REALIZADA'}" class="estado realizada">REALIZADA</span>
+    <span th:if="${cita.estado == 'CANCELADA'}" class="estado cancelada">CANCELADA</span>
+</td>
+
+<td class="acciones">
+    <span th:if="${cita.estado == 'PENDIENTE'}">
+        <a th:href="@{/realizarCita/{id}(id=${cita.id})}" class="btn realizada">
+            Finalizar
+        </a>
+    </span>
+
+    <span th:if="${cita.estado != 'PENDIENTE'}">
+        ---
+    </span>
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</body>
+</html>

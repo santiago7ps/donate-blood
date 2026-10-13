@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Banco</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>BANCO</h2>
+    <div class="menu">
+    <a href="/banco/unidades" class="activo">🩸 Unidades disponibles</a>
+    <a href="/banco/modificar">✏️ Modificar unidades</a>
+    <a href="/banco/citas">📅 Ver citas</a>
+     <a href="/" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+<h1>Unidades disponibles</h1>
+
+<table>
+<tr>
+<th>Tipo</th>
+<th>Cantidad</th>
+</tr>
+
+<tr th:each="u : ${unidades}">
+<td th:text="${u.key}"></td>
+<td th:text="${u.value}"></td>
+</tr>
+
+</table>
+
+</div>
+
+</body>
+</html>

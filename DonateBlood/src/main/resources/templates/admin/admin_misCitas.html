@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+<h2>ADMIN</h2>
+<div class="menu">
+<a href="/admin/unidades">🩸 Unidades</a>
+<a href="/admin/modificar">✏️ Modificar</a>
+<a href="/admin/pedidos">📦 Pedidos</a>
+<a href="/admin/misCitas" class="activo">📅 Citas</a>
+<a href="/admin/agendar">➕ Agendar</a>
+<a href="/" class="salir">🚪 Salir</a>
+</div>
+</div>
+
+<div class="contenido">
+
+<h1>Citas</h1>
+
+<table>
+<tr>
+<th>Nombre</th>
+<th>Fecha</th>
+<th>Hora</th>
+<th>Lugar</th>
+<th>Tipo de Sangre</th>
+<th>Estado</th>
+<th>Acciones</th>
+</tr>
+
+<tr th:each="c : ${citas}">
+<td th:text="${c.nombre}"></td>
+<td th:text="${c.fecha}"></td>
+<td th:text="${c.hora}"></td>
+<td th:text="${c.lugar}"></td>
+<td th:text="${c.tipoSangre}"></td>
+
+<td>
+    <span th:if="${c.estado == 'PENDIENTE'}" class="estado pendiente">PENDIENTE</span>
+    <span th:if="${c.estado == 'REALIZADA'}" class="estado realizada">REALIZADA</span>
+    <span th:if="${c.estado == 'CANCELADA'}" class="estado cancelada">CANCELADA</span>
+</td>
+
+<td>
+    <span th:if="${c.estado == 'PENDIENTE'}">
+
+        <a th:href="@{/editarCita/{id}(id=${c.id})}" class="btn editar">
+            Editar
+        </a>
+
+        <a th:href="@{/admin/realizarCita/{id}(id=${c.id})}" class="btn realizada">
+            Realizar
+        </a>
+
+        <a th:href="@{/admin/cancelarCita/{id}(id=${c.id})}"
+           onclick="return confirm('¿Cancelar cita?')"
+           class="btn cancelar">
+            Cancelar
+        </a>
+
+    </span>
+
+    <span th:if="${c.estado != 'PENDIENTE'}">
+        ---
+    </span>
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</body>
+</html>

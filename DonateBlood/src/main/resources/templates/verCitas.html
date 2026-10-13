@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Mis Citas</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>DONANTE</h2>
+
+    <div class="menu">
+        <a href="/agendarCita">📅 Agendar cita</a>
+        <a href="/verCitas" class="activo">🩸 Mis citas</a>
+        <a href="/perfilDonante">👤 Mi perfil</a>
+        <a href="/" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+    <h1>Mis Citas</h1>
+
+    <table>
+        <tr>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Lugar</th>
+            <th>Tipo de Sangre</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+
+        <tr th:each="cita : ${citas}">
+            <td th:text="${cita.nombre}"></td>
+            <td th:text="${cita.fecha}"></td>
+            <td th:text="${cita.hora}"></td>
+            <td th:text="${cita.lugar}"></td>
+            <td th:text="${cita.tipoSangre}"></td>
+
+            <td>
+                <span th:if="${cita.estado == 'PENDIENTE'}" class="estado pendiente">PENDIENTE</span>
+                <span th:if="${cita.estado == 'REALIZADA'}" class="estado realizada">REALIZADA</span>
+                <span th:if="${cita.estado == 'CANCELADA'}" class="estado cancelada">CANCELADA</span>
+            </td>
+
+            <td class="acciones">
+                <span th:if="${cita.estado == 'PENDIENTE'}">
+                    <a th:href="@{/editarCita/{id}(id=${cita.id})}" class="btn editar">Editar</a>
+
+                    <a th:href="@{/cancelarCita/{id}(id=${cita.id})}"
+                       onclick="return confirm('¿Cancelar cita?')"
+                       class="btn cancelar">Cancelar</a>
+                </span>
+
+                <span th:if="${cita.estado != 'PENDIENTE'}">
+                    <span class="no-disponible">No disponible</span>
+                </span>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+</body>
+</html>

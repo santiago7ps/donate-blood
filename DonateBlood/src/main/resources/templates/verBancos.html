@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contactos - Donate Blood</title>
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body class="public-banks">
+    <nav class="navbar">
+      <ul class="navbar-menu">
+          <li><a href="/">Inicio</a></li>
+
+          <li class="dropdown">
+              <a href="#" class="dropbtn">Usted es</a>
+              <ul class="dropdown-content">
+                  <li><a href="/login">Centro Médico</a></li>
+                  <li><a href="/login">Banco de Sangre</a></li>
+                  <li><a href="/login">Administrador</a></li>
+
+              </ul>
+          </li>
+          <li><a href="/info">Información</a></li>
+          <li>
+                <a href="https://api.whatsapp.com/send?phone=573043717467" target="_blank">
+                Contáctanos
+                </a>
+            </li>
+          <li><a href="/" class="navbar-btn">Inscríbete aquí</a></li>
+      </ul>
+  </nav>
+    <header>
+        <h1>Contáctanos - Donate Blood</h1>
+    </header>
+
+    <main>
+        <h2>🩸 Bancos de Sangre en Cartagena</h2>
+        <p>
+            Si deseas donar sangre o conocer más sobre el proceso de donación,
+            puedes comunicarte directamente con los bancos de sangre disponibles en la ciudad de <strong>Cartagena</strong>.
+            Aquí encontrarás sus direcciones, teléfonos y enlaces para ver la ubicación exacta en el mapa.
+        </p>
+
+        <div class="tarjeta">
+            <h3>Banco de Sangre Hemocaribe</h3>
+            <p><strong>Dirección:</strong> Transversal 54 #30, Local 9, Cartagena</p>
+            <p><strong>Teléfono:</strong> 310 456 7890</p>
+            <p><strong>Descripción:</strong> Hemocaribe es uno de los bancos más reconocidos en la ciudad.</p>
+            <div class="botones">
+                <a href="https://www.google.com/maps/place/Transversal+54+%2330,+Local+9,+Cartagena" target="_blank" class="boton">Ver ubicación</a>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Banco de Sangre “Ángela Mejía Dizeo Ltda”</h3>
+            <p><strong>Dirección:</strong> Calle del Biffi No 31-153, Barrio Providencia, Cartagena</p>
+            <p><strong>Teléfono:</strong> 317 221 4456</p>
+            <p><strong>Descripción:</strong> Institución privada dedicada a la recolección y distribución de sangre.</p>
+            <div class="botones">
+                <a href="https://www.google.com/maps/place/Calle+del+Biffi+No+31-153,+Cartagena" target="_blank" class="boton">Ver ubicación</a>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Nuevo Hospital Bocagrande - Banco de Sangre</h3>
+            <p><strong>Dirección:</strong> Calle 5 #6-49, Bocagrande, Cartagena</p>
+            <p><strong>Teléfono:</strong> 320 345 8890</p>
+            <p><strong>Descripción:</strong> Banco de sangre del Nuevo Hospital Bocagrande, disponible para donaciones y urgencias.</p>
+            <div class="botones">
+                <a href="https://www.google.com/maps/place/Calle+5+%236-49,+Bocagrande,+Cartagena" target="_blank" class="boton">Ver ubicación</a>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Cruz Roja Colombiana Seccional Bolívar</h3>
+            <p><strong>Dirección:</strong> Calle 47D #30-47, Barrio España, Cartagena</p>
+            <p><strong>Teléfono:</strong> 317 218 0488</p>
+            <p><strong>Descripción:</strong> Organización de voluntariado con banco de sangre y servicios médicos para la comunidad.</p>
+            <div class="botones">
+                <a href="https://www.google.com/maps/place/Calle+47D+%2330-47,+Cartagena,+Bol%C3%ADvar" target="_blank" class="boton">Ver ubicación</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Proyecto Donate Blood © 2026 - Hecho por: Luis Manuel Miranda, Santiago Pérez, Jose Orozco, Santiago Sarria</p>
+    </footer>
+    <script>
+
+    document.querySelectorAll('.dropdown').forEach(function(dropdown) {
+        var btn = dropdown.querySelector('.dropbtn');
+        var content = dropdown.querySelector('.dropdown-content');
+            var hideTimeout;
+            dropdown.addEventListener('mouseenter', function() {
+                clearTimeout(hideTimeout);
+                content.style.display = 'block';
+            });
+            dropdown.addEventListener('mouseleave', function() {
+                hideTimeout = setTimeout(function() {
+                    content.style.display = 'none';
+                }, 1000);
+            });
+            btn.addEventListener('click', function(e) {
+                var isOpen = content.style.display === 'block';
+                document.querySelectorAll('.dropdown-content').forEach(function(dc) {
+                    dc.style.display = 'none';
+            });
+            content.style.display = isOpen ? 'none' : 'block';
+            e.preventDefault();
+            e.stopPropagation();
+            content.querySelectorAll('a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    content.style.display = 'none';
+                });
+            });
+        });
+    });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-content').forEach(function(dc) {
+                dc.style.display = 'none';
+            });
+        }
+    });
+</script>
+</body>
+</html>
