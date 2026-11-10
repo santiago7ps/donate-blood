@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Agendar Cita</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>DONANTE</h2>
+
+    <div class="menu">
+        <a href="/agendarCita" class="activo">📅 Agendar cita</a>
+        <a href="/verCitas">🩸 Mis citas</a>
+        <a href="/mapaBancos">🗺️ Bancos cercanos</a>
+        <a href="/perfilDonante">👤 Mi perfil</a>
+        <a href="/logout" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+    <h1>Agendar Cita</h1>
+
+    <div th:if="${param.error == 'hora-invalida'}" class="error">Hora inválida. Seleccione una franja disponible.</div>
+
+    <div th:if="${param.error == 'fecha-pasada'}" class="error">La fecha no puede ser anterior a hoy. Elija una fecha desde hoy en adelante.</div>
+
+    <div th:if="${cupoLleno}" class="error">
+        La hora <strong th:text="${horaLlena}"></strong> ya no tiene cupos en
+        <strong th:text="${bancoLleno}"></strong> el <strong th:text="${fechaLlena}"></strong>.
+        <span th:if="${#lists.isEmpty(horasLibres)}">Ese día no quedan horas disponibles; pruebe con otra fecha u otro banco.</span>
+        <span th:unless="${#lists.isEmpty(horasLibres)}">
+            Horas que todavía tienen cupo: <strong th:text="${#strings.listJoin(horasLibres, ', ')}"></strong>.
+        </span>
+    </div>
+
+    <form action="/agendarCita" method="post">
+<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <input type="text" name="nombre" placeholder="Nombre" required>
+
+        <input type="date" name="fecha" id="fecha" required>
+
+        <select name="hora" id="hora" required>
+            <option value="">Seleccione franja horaria</option>
+            <option value="08:00">08:00 - 08:30</option>
+            <option value="08:30">08:30 - 09:00</option>
+            <option value="09:00">09:00 - 09:30</option>
+            <option value="09:30">09:30 - 10:00</option>
+            <option value="10:00">10:00 - 10:30</option>
+            <option value="10:30">10:30 - 11:00</option>
+            <option value="11:00">11:00 - 11:30</option>
+            <option value="11:30">11:30 - 12:00</option>
+
+            <option value="14:00">14:00 - 14:30</option>
+            <option value="14:30">14:30 - 15:00</option>
+            <option value="15:00">15:00 - 15:30</option>
+            <option value="15:30">15:30 - 16:00</option>
+            <option value="16:00">16:00 - 16:30</option>
+            <option value="16:30">16:30 - 17:00</option>
+        </select>
+
+        <select name="lugar" id="lugar" required>
+            <option value="">Seleccione banco</option>
+            <option th:if="${#lists.isEmpty(bancos)}" disabled>No hay bancos registrados</option>
+            <option th:each="banco : ${bancos}"
+                    th:value="${banco.nombre != null and banco.nombre != '' ? banco.nombre : banco.username}"
+                    th:text="${banco.nombre != null and banco.nombre != '' ? banco.nombre : banco.username}">
+            </option>
+        </select>
+
+        <select name="tipoSangre" required>
+            <option value="">Seleccione tipo de sangre</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+
+        <p id="aviso-horas" style="font-size:13px;"></p>
+
+        <button type="submit">Agendar</button>
+
+    </form>
+
+</div>
+
+<script>
+(function () {
+    var fecha = document.getElementById('fecha');
+    var lugar = document.getElementById('lugar');
+    var hora = document.getElementById('hora');
+    var aviso = document.getElementById('aviso-horas');
+
+    function fin(h) {
+        var p = h.split(':'), m = parseInt(p[0], 10) * 60 + parseInt(p[1], 10) + 30;
+        return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+    }
+
+    function cargarHoras() {
+        if (!fecha.value || !lugar.value) return;
+
+        fetch('/disponibilidad?lugar=' + encodeURIComponent(lugar.value) +
+              '&fecha=' + encodeURIComponent(fecha.value), { credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (filas) {
+                var previa = hora.value;
+                hora.innerHTML = '<option value="">Seleccione franja horaria</option>';
+                var libres = 0;
+
+                filas.forEach(function (f) {
+                    var o = document.createElement('option');
+                    o.value = f.hora;
+                    if (f.libres > 0) {
+                        libres++;
+                        o.textContent = f.hora + ' - ' + fin(f.hora) + '  (' + f.libres +
+                                        (f.libres === 1 ? ' cupo)' : ' cupos)');
+                    } else {
+                        o.disabled = true;
+                        o.textContent = f.hora + ' - ' + fin(f.hora) + '  (llena)';
+                    }
+                    if (f.hora === previa && f.libres > 0) o.selected = true;
+                    hora.appendChild(o);
+                });
+
+                aviso.textContent = libres === 0
+                    ? 'Ese día no quedan horas disponibles en este banco. Pruebe con otra fecha u otro banco.'
+                    : '';
+            })
+            .catch(function () { /* si falla, se conserva la lista completa y el servidor valida */ });
+    }
+
+    fecha.addEventListener('change', cargarHoras);
+    lugar.addEventListener('change', cargarHoras);
+})();
+</script>
+
+<script>
+(function () {
+    var f = document.getElementById('fecha');
+    if (f) f.min = new Date().toLocaleDateString('en-CA');
+})();
+</script>
+
+</body>
+</html>

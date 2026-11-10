@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Donante</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>DONANTE</h2>
+
+    <div class="menu">
+        <a href="/agendarCita">📅 Agendar cita</a>
+        <a href="/verCitas">🩸 Mis citas</a>
+        <a href="/mapaBancos">🗺️ Bancos cercanos</a>
+        <a href="/perfilDonante">👤 Mi perfil</a>
+        <a href="/logout" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+    <h1 th:text="${usuario != null and !#strings.isEmpty(usuario.nombre)} ? ('Hola, ' + ${usuario.nombre} + ' 👋') : 'Panel Donante'">Panel Donante</h1>
+    <p>Gracias por ser donante ❤️ Agenda tu próxima cita o revisa tu historial.</p>
+
+    <div th:if="${!#lists.isEmpty(recordatorios)}" class="aviso">
+        <strong>🔔 Recordatorios</strong>
+        <p th:each="r : ${recordatorios}" th:text="${r}" style="margin: 6px 0 0;"></p>
+    </div>
+
+    <div class="quick-links">
+
+        <a href="/agendarCita" class="quick-card">
+            <div class="quick-icon">📅</div>
+            <strong>Agendar cita</strong>
+            <span>Programa tu próxima donación</span>
+        </a>
+
+        <a href="/verCitas" class="quick-card">
+            <div class="quick-icon">🩸</div>
+            <strong>Mis citas</strong>
+            <span>Consulta el estado de tus citas</span>
+        </a>
+
+        <a href="/mapaBancos" class="quick-card">
+            <div class="quick-icon">🗺️</div>
+            <strong>Bancos cercanos</strong>
+            <span>Encuentra dónde donar en el mapa</span>
+        </a>
+
+        <a href="/perfilDonante" class="quick-card">
+            <div class="quick-icon">👤</div>
+            <strong>Mi perfil</strong>
+            <span>Revisa y actualiza tus datos</span>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

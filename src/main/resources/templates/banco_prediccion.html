@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predicción de asistencia</title>
+
+<link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>BANCO</h2>
+
+    <div class="menu">
+        <a href="/banco/unidades">🩸 Unidades disponibles</a>
+        <a href="/banco/modificar">✏️ Modificar unidades</a>
+        <a href="/banco/citas">📅 Ver citas</a>
+        <a href="/banco/capacidad">👩‍⚕️ Capacidad de atención</a>
+        <a href="/banco/prediccion" class="activo">📈 Predicción de asistencia</a>
+        <a href="/logout" class="salir">🚪 Salir</a>
+    </div>
+</div>
+
+<div class="contenido">
+
+<h1>📈 Predicción de asistencia</h1>
+
+<p>Estimamos si cada donante irá a su cita según cuántas de sus citas anteriores cumplió.</p>
+
+<div th:if="${total == 0}" class="estado-vacio">
+    <span class="estado-vacio-icono">🩸</span>
+    <p>No hay citas pendientes próximas</p>
+</div>
+
+<div th:unless="${total == 0}">
+
+    <div class="aviso">
+        De las <strong th:text="${total}">0</strong> citas pendientes próximas, se espera que asistan
+        unas <strong th:text="${esperadas}">0</strong>.
+        <strong th:text="${altos}">0</strong> son poco probables,
+        <strong th:text="${medios}">0</strong> son probables y
+        <strong th:text="${bajos}">0</strong> son muy probables.
+    </div>
+
+    <form method="get" action="/banco/prediccion" style="margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div>
+            <label for="buscar">Buscar donante</label><br>
+            <input id="buscar" name="buscar" type="text" placeholder="Nombre o usuario" th:value="${buscar}" style="min-width: 260px;" />
+        </div>
+        <div>
+            <button type="submit">Buscar</button>
+            <a href="/banco/prediccion" style="margin-left: 10px;">Limpiar</a>
+        </div>
+    </form>
+
+    <p style="margin-bottom: 12px;"><strong>Citas encontradas:</strong> <span th:text="${encontradas}">0</span>
+        <span th:if="${encontradas > maximo}" class="no-disponible">
+            · se muestran las <span th:text="${maximo}">100</span> con menor probabilidad; usa el buscador para ver una persona.
+        </span>
+    </p>
+
+    <div th:if="${encontradas == 0}" class="estado-vacio">
+        <span class="estado-vacio-icono">🔎</span>
+        <p>No se encontró ningún donante con esa búsqueda</p>
+    </div>
+
+    <table th:unless="${encontradas == 0}">
+    <tr>
+        <th>Cita</th>
+        <th>Qué significa</th>
+        <th>Resultado</th>
+    </tr>
+    <tr th:each="cita : ${pendientes}">
+        <td>
+            <strong th:text="${cita.nombre}"></strong><br>
+            <span th:text="${cita.fecha} + ' · ' + ${cita.hora} + ' · ' + ${cita.lugar}"></span>
+        </td>
+        <td th:text="${prediccion.interpretacion(cita.usuario)}"></td>
+        <td><span th:class="'riesgo ' + ${prediccion.riesgo(cita.usuario)}"
+                  th:text="${prediccion.etiqueta(cita.usuario)} + ' · ' + ${prediccion.porcentaje(cita.usuario)} + '%'"></span></td>
+    </tr>
+    </table>
+
+</div>
+
+</div>
+
+</body>
+</html>

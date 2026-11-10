@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completa tu perfil | Donate Blood</title>
+
+    <link rel="icon" type="image/png" href="/img/logo.png">
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg);
+        }
+        .panel-container {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            width: 460px;
+            max-width: 92vw;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+        }
+        .panel-container h1 {
+            margin: 0 0 6px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text);
+        }
+        .panel-container p.subt {
+            margin: 0 0 22px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .panel-container form {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+        }
+        .panel-container select,
+        .panel-container input {
+            width: 100%;
+            padding: 12px 14px;
+            margin: 6px 0 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 14.5px;
+        }
+        .panel-container select:focus,
+        .panel-container input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-soft);
+        }
+        .panel-container button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(217, 4, 41, 0.25);
+            transition: transform 0.18s ease;
+        }
+        .panel-container button:hover {
+            transform: translateY(-2px);
+        }
+</style>
+</head>
+<body>
+
+<div class="panel-container">
+    <h1>Completa tu perfil</h1>
+    <p class="subt">Para agendar tus donaciones necesitamos unos datos más.</p>
+
+    <form action="/completarPerfil" method="POST">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <label>Correo</label>
+        <input type="text" th:value="${usuario.email}" readonly>
+
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" th:value="${usuario.nombre}" required>
+        <p class="error" th:if="${errorNombre}" th:text="${errorNombre}"></p>
+
+        <label for="tipoDocumento">Tipo de documento</label>
+        <select id="tipoDocumento" name="tipoDocumento" required>
+            <option value="" disabled th:selected="${usuario.tipoDocumento == null}">Selecciona una opción</option>
+            <option value="CC" th:selected="${usuario.tipoDocumento == 'CC'}">Cédula de Ciudadanía</option>
+            <option value="CE" th:selected="${usuario.tipoDocumento == 'CE'}">Cédula de Extranjería</option>
+            <option value="PA" th:selected="${usuario.tipoDocumento == 'PA'}">Pasaporte</option>
+            <option value="PEP" th:selected="${usuario.tipoDocumento == 'PEP'}">Permiso Especial de Permanencia</option>
+        </select>
+        <p class="error" th:if="${errorTipoDocumento}" th:text="${errorTipoDocumento}"></p>
+
+        <label for="documento">Número de documento</label>
+        <input type="text" id="documento" name="documento" th:value="${usuario.documento}"
+               inputmode="numeric" pattern="\d{6,15}" maxlength="15" required>
+        <p class="error" th:if="${errorDocumento}" th:text="${errorDocumento}"></p>
+
+        <label for="numPhone">Teléfono</label>
+        <input type="tel" id="numPhone" name="numPhone" th:value="${usuario.numPhone}"
+               inputmode="numeric" pattern="\d{10}" maxlength="10" placeholder="10 dígitos" required>
+        <p class="error" th:if="${errorPhone}" th:text="${errorPhone}"></p>
+
+        <label for="edad">Edad</label>
+        <input type="number" id="edad" name="edad" th:value="${usuario.edad}" min="18" max="120" required>
+        <p class="error" th:if="${errorEdad}" th:text="${errorEdad}"></p>
+
+        <button type="submit">Guardar y continuar</button>
+    </form>
+
+    <br>
+    <a href="/logout">Salir</a>
+</div>
+
+</body>
+</html>
