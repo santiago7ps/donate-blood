@@ -18,6 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(perfilCompletoInterceptor).addPathPatterns(
                 "/donantePanel",
                 "/perfilDonante",
+                "/editarPerfil",
                 "/agendarCita",
                 "/misCitas",
                 "/verCitas",

@@ -26,6 +26,8 @@
 
     <h1 class="titulo">Mi Perfil</h1>
 
+    <div th:if="${success}" class="success" th:text="${success}"></div>
+
     <div class="card-perfil">
 
         <div class="perfil-img">
@@ -73,6 +75,10 @@
 
         </div>
 
+    </div>
+
+    <div style="margin-top: 22px;">
+        <a href="/editarPerfil" class="btn-primary">✏️ Editar perfil</a>
     </div>
 
 </div>

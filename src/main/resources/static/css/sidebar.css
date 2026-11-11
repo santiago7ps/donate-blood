@@ -556,6 +556,158 @@ a.btn-primary:hover {
     max-width: 460px;
 }
 
+/* ---------- Editar perfil: foto a la izquierda, datos a la derecha ---------- */
+.perfil-form {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 44px;
+    align-items: start;
+    max-width: 980px;
+}
+
+.perfil-foto-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    padding-right: 36px;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 24px;
+}
+
+.perfil-foto-col h2 {
+    margin-bottom: 4px;
+}
+
+.perfil-foto-preview img {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary-soft);
+    box-shadow: var(--shadow);
+    margin: 6px 0 14px;
+    transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.perfil-foto-preview img:hover {
+    transform: scale(1.04);
+    box-shadow: var(--shadow-primary);
+}
+
+.perfil-datos-col h2 {
+    margin-top: 0;
+}
+
+.perfil-datos-col h2:not(:first-child) {
+    margin-top: 30px;
+}
+
+.perfil-datos-col label {
+    display: block;
+    margin-top: 16px;
+}
+
+.perfil-form .hint {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    line-height: 1.45;
+    margin: 4px 0 0;
+}
+
+.perfil-form input[type="file"] {
+    width: auto;
+    max-width: 100%;
+    font-size: 0;
+    color: transparent;
+    background: #fbfbfc;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin: 4px 0;
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.perfil-form input[type="file"]:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.perfil-form input[type="file"]::file-selector-button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 13px;
+    margin-right: 0;
+    cursor: pointer;
+    transition: transform 0.2s var(--ease);
+}
+
+.perfil-form input[type="file"]::file-selector-button:hover {
+    transform: translateY(-1px);
+}
+
+.perfil-acciones {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.perfil-form .input-password {
+    position: relative;
+}
+
+.perfil-form .input-password input {
+    padding-right: 46px;
+}
+
+.perfil-form .toggle-password {
+    position: absolute;
+    right: 14px;
+    top: calc(50% + 1px);
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    padding: 4px;
+    color: #929aaa;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.perfil-form .toggle-password svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.perfil-form .toggle-password:hover {
+    color: var(--primary);
+    transform: translateY(-50%) scale(1.08);
+}
+
+@media (max-width: 900px) {
+    .perfil-form {
+        grid-template-columns: 1fr;
+        gap: 26px;
+    }
+
+    .perfil-foto-col {
+        position: static;
+        padding-right: 0;
+        padding-bottom: 24px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+}
+
 .mensaje,
 .error,
 .success {

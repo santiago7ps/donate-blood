@@ -117,6 +117,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/donantePanel",
                         "/perfilDonante",
+                        "/editarPerfil",
                         "/verCitas",
                         "/agendarCita",
                         "/misCitas",
