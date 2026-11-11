@@ -12,3 +12,6 @@ Thumbs.db
 # Credenciales locales
 secrets.properties
 .env
+
+# Fotos de perfil subidas por usuarios
+uploads/

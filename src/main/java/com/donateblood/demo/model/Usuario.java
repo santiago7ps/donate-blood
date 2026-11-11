@@ -24,6 +24,9 @@ public class Usuario {
     // Solo aplica a ROLE_BANCO: médicos/cuartos = donantes máximos por fecha y hora
     private Integer capacidadAtencion;
 
+    // Nombre del archivo de la foto de perfil guardado en disco
+    private String fotoPerfil;
+
     public Usuario(){}
 
     public Usuario(String username, String password, String rol) {
@@ -118,6 +121,14 @@ public class Usuario {
 
     public void setCapacidadAtencion(Integer capacidadAtencion) {
         this.capacidadAtencion = capacidadAtencion;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 
     /** Un donante tiene el perfil completo cuando ya registró documento, teléfono y edad. */

@@ -99,6 +99,7 @@ public class SecurityConfig {
 
                         "/img/**",
                         "/images/**",
+                        "/perfiles/**",
 
                         "/oauth2/**",
                         "/login/oauth2/**"

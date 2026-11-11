@@ -1,15 +1,21 @@
 package com.donateblood.demo.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.donateblood.demo.ml.Recordatorio;
@@ -17,6 +23,7 @@ import com.donateblood.demo.model.Usuario;
 import com.donateblood.demo.model.Cita;
 import com.donateblood.demo.repository.UsuarioRepository;
 import com.donateblood.demo.repository.CitaRepository;
+import com.donateblood.demo.util.ImageOptimizer;
 
 @Controller
 public class UsuarioController {
@@ -29,6 +36,9 @@ public class UsuarioController {
 
     @Autowired
     private CitaRepository citaRepo;
+
+    @Value("${app.uploads.dir:uploads/perfiles}")
+    private String uploadsDir;
 
     private String validarRolPublico(String rol) {
         if ("ROLE_CENTRO".equals(rol) || "ROLE_BANCO".equals(rol)) {
@@ -218,6 +228,7 @@ public class UsuarioController {
             @RequestParam(required = false) String currentPassword,
             @RequestParam(required = false) String newPassword,
             @RequestParam(required = false) String confirmNewPassword,
+            @RequestParam(value = "fotoPerfil", required = false) MultipartFile foto,
             Model model,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
@@ -279,6 +290,17 @@ public class UsuarioController {
             }
         }
 
+        if (foto != null && !foto.isEmpty()) {
+            String tipo = foto.getContentType();
+            if (tipo == null || !tipo.startsWith("image/")) {
+                model.addAttribute("errorFoto", "El archivo debe ser una imagen (JPG o PNG)");
+                hayError = true;
+            } else if (foto.getSize() > 5L * 1024 * 1024) {
+                model.addAttribute("errorFoto", "La imagen no puede superar 5 MB");
+                hayError = true;
+            }
+        }
+
         if (hayError) {
             // Se devuelve lo que escribió (sin guardar) para que no tenga que repetirlo
             usuario.setNombre(nombreLimpio);
@@ -298,6 +320,26 @@ public class UsuarioController {
 
         if (quiereCambiarPassword) {
             usuario.setPassword(passwordEncoder.encode(newPassword));
+        }
+
+        if (foto != null && !foto.isEmpty()) {
+            try {
+                String nombreAnterior = usuario.getFotoPerfil();
+                String nombreNuevo = usuario.getId() + "_" + System.currentTimeMillis() + ".jpg";
+                Path dir = Paths.get(uploadsDir).toAbsolutePath().normalize();
+                Path destino = dir.resolve(nombreNuevo);
+
+                ImageOptimizer.guardarOptimizada(foto, destino, 400, 0.8f);
+                usuario.setFotoPerfil(nombreNuevo);
+
+                if (nombreAnterior != null && !nombreAnterior.isBlank()) {
+                    Files.deleteIfExists(dir.resolve(nombreAnterior));
+                }
+            } catch (IOException e) {
+                model.addAttribute("errorFoto", "No se pudo procesar la imagen");
+                model.addAttribute("usuario", usuario);
+                return "editarPerfil";
+            }
         }
 
         usuarioRepo.save(usuario);

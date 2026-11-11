@@ -31,7 +31,8 @@
     <div class="card-perfil">
 
         <div class="perfil-img">
-            <img src="/img/PerfilDefinitivo.jpeg" alt="Perfil">
+            <img th:src="${usuario.fotoPerfil != null ? '/perfiles/' + usuario.fotoPerfil : '/img/PerfilDefinitivo.jpeg'}"
+                 alt="Perfil">
         </div>
 
         <div class="perfil-info">
