@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -5,6 +6,101 @@
 <title>Citas Banco</title>
 
 <link rel="stylesheet" href="/css/sidebar.css">
+
+<style>
+    .resumen-citas {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 18px 0;
+    }
+
+    .resumen-citas p {
+        margin: 0;
+    }
+
+    .selector-pagina {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .selector-pagina select {
+        padding: 7px 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+    }
+
+    .paginacion {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 25px;
+        margin-bottom: 20px;
+    }
+
+    .paginacion a,
+    .paginacion span {
+        min-width: 38px;
+        padding: 9px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        background: white;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    .paginacion a:hover {
+        background: #fce8ea;
+        border-color: #b42332;
+        color: #b42332;
+    }
+
+    .paginacion a.pagina-activa {
+        background: #b42332;
+        border-color: #b42332;
+        color: white;
+        font-weight: bold;
+    }
+
+    .paginacion .pagina-desactivada {
+        color: #aaa;
+        background: #f5f5f5;
+        cursor: not-allowed;
+    }
+
+    .informacion-paginacion {
+        text-align: center;
+        color: #666;
+        font-size: 13px;
+        margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+        .resumen-citas {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .paginacion {
+            gap: 5px;
+        }
+
+        .paginacion a,
+        .paginacion span {
+            min-width: 34px;
+            padding: 8px;
+        }
+    }
+</style>
+
 </head>
 <body>
 
@@ -24,88 +120,288 @@
 
 <h2>🩸 Citas Agendadas</h2>
 
-<form method="get" action="/banco/citas" style="margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+<!-- FILTROS DE BÚSQUEDA -->
+<form method="get"
+      action="/banco/citas"
+      style="margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+
     <div>
         <label for="tipo">Tipo de sangre</label><br>
+
         <select id="tipo" name="tipo" style="min-width: 160px;">
-            <option value="" th:selected="${tipoSeleccionado == null || tipoSeleccionado == ''}">Todos</option>
+
+            <option value=""
+                th:selected="${tipoSeleccionado == null || tipoSeleccionado == ''}">
+                Todos
+            </option>
+
             <option value="A+" th:selected="${tipoSeleccionado == 'A+'}">A+</option>
-            <option value="A-" th:selected="${tipoSeleccionado == 'A-' }">A-</option>
+            <option value="A-" th:selected="${tipoSeleccionado == 'A-'}">A-</option>
             <option value="B+" th:selected="${tipoSeleccionado == 'B+'}">B+</option>
-            <option value="B-" th:selected="${tipoSeleccionado == 'B-' }">B-</option>
+            <option value="B-" th:selected="${tipoSeleccionado == 'B-'}">B-</option>
             <option value="AB+" th:selected="${tipoSeleccionado == 'AB+'}">AB+</option>
-            <option value="AB-" th:selected="${tipoSeleccionado == 'AB-' }">AB-</option>
+            <option value="AB-" th:selected="${tipoSeleccionado == 'AB-'}">AB-</option>
             <option value="O+" th:selected="${tipoSeleccionado == 'O+'}">O+</option>
-            <option value="O-" th:selected="${tipoSeleccionado == 'O-' }">O-</option>
+            <option value="O-" th:selected="${tipoSeleccionado == 'O-'}">O-</option>
+
         </select>
     </div>
 
     <div>
         <label for="cedula">Buscar por usuario</label><br>
-        <input id="cedula" name="cedula" type="text" placeholder="Nombre de usuario" th:value="${cedulaBusqueda}" style="min-width: 220px;" />
+
+        <input
+            id="cedula"
+            name="cedula"
+            type="text"
+            placeholder="Nombre de usuario"
+            th:value="${cedulaBusqueda}"
+            style="min-width: 220px;"
+        />
     </div>
+
     <div>
         <button type="submit">Buscar</button>
         <a href="/banco/citas" style="margin-left: 10px;">Limpiar</a>
     </div>
+
 </form>
 
-<p style="margin-bottom: 12px;"><strong>Total de citas mostradas:</strong> <span th:text="${contador}">0</span>
-    <a href="/banco/prediccion" style="margin-left: 16px;">📈 Ver predicción de asistencia</a></p>
+<!-- RESUMEN Y CANTIDAD DE REGISTROS -->
+<div class="resumen-citas">
 
-<div th:if="${#lists.isEmpty(citas)}" class="estado-vacio">
-    <span class="estado-vacio-icono">🩸</span>
-    <p>No hay citas registradas</p>
+    <p>
+        <strong>Total de citas:</strong>
+        <span th:text="${contador}">0</span>
+    </p>
+
+    <div class="selector-pagina">
+
+        <label for="cantidadPagina">Mostrar:</label>
+
+        <form method="get" action="/banco/citas">
+
+            <input type="hidden"
+                   name="tipo"
+                   th:value="${tipoSeleccionado}">
+
+            <input type="hidden"
+                   name="cedula"
+                   th:value="${cedulaBusqueda}">
+
+            <select id="cantidadPagina"
+                    name="size"
+                    onchange="this.form.submit()">
+
+                <option value="25"
+                    th:selected="${tamanioPagina == 25}">
+                    25
+                </option>
+
+                <option value="50"
+                    th:selected="${tamanioPagina == 50}">
+                    50
+                </option>
+
+                <option value="100"
+                    th:selected="${tamanioPagina == 100}">
+                    100
+                </option>
+
+            </select>
+
+            <span>por página</span>
+
+        </form>
+
+    </div>
+
 </div>
 
-<table th:unless="${#lists.isEmpty(citas)}">
+<!-- ENLACE A PREDICCIÓN -->
+<p style="margin-bottom: 15px;">
+    <a href="/banco/prediccion">
+        📈 Ver predicción de asistencia
+    </a>
+</p>
+
+<!-- MENSAJE CUANDO NO EXISTEN CITAS -->
+<div th:if="${citas.empty}" class="estado-vacio">
+
+    <span class="estado-vacio-icono">🩸</span>
+
+    <p>No hay citas registradas</p>
+
+</div>
+
+<!-- TABLA DE CITAS -->
+<table th:unless="${citas.empty}">
+
 <tr>
-<th>Nombre</th>
-<th>Fecha</th>
-<th>Hora</th>
-<th>Lugar</th>
-<th>Tipo de Sangre</th>
-<th>Estado</th>
-<th>Prob. de asistir</th>
-<th>Acción</th>
+    <th>Nombre</th>
+    <th>Fecha</th>
+    <th>Hora</th>
+    <th>Lugar</th>
+    <th>Tipo de Sangre</th>
+    <th>Estado</th>
+    <th>Prob. de asistir</th>
+    <th>Acción</th>
 </tr>
 
 <tr th:each="cita : ${citas}">
-<td th:text="${cita.nombre}"></td>
-<td th:text="${cita.fecha}"></td>
-<td th:text="${cita.hora}"></td>
-<td th:text="${cita.lugar}"></td>
-<td th:text="${cita.tipoSangre}"></td>
 
-<td>
-    <span th:if="${cita.estado == 'PENDIENTE'}" class="estado pendiente">PENDIENTE</span>
-    <span th:if="${cita.estado == 'REALIZADA'}" class="estado realizada">REALIZADA</span>
-    <span th:if="${cita.estado == 'CANCELADA'}" class="estado cancelada">CANCELADA</span>
-</td>
+    <td th:text="${cita.nombre}"></td>
 
-<td>
-    <span th:if="${cita.estado == 'PENDIENTE'}"
-          th:class="'riesgo ' + ${prediccion.riesgo(cita.usuario)}"
-          th:text="${prediccion.etiqueta(cita.usuario)} + ' · ' + ${prediccion.porcentaje(cita.usuario)} + '%'"
-          th:title="${prediccion.interpretacion(cita.usuario)}">--</span>
-    <span th:unless="${cita.estado == 'PENDIENTE'}">---</span>
-</td>
+    <td th:text="${cita.fecha}"></td>
 
-<td class="acciones">
-    <span th:if="${cita.estado == 'PENDIENTE'}">
-        <a th:href="@{/realizarCita/{id}(id=${cita.id})}" class="btn realizada">
-            Finalizar
-        </a>
-    </span>
+    <td th:text="${cita.hora}"></td>
 
-    <span th:if="${cita.estado != 'PENDIENTE'}">
-        ---
-    </span>
-</td>
+    <td th:text="${cita.lugar}"></td>
+
+    <td th:text="${cita.tipoSangre}"></td>
+
+    <td>
+        <span th:if="${cita.estado == 'PENDIENTE'}"
+              class="estado pendiente">
+            PENDIENTE
+        </span>
+
+        <span th:if="${cita.estado == 'REALIZADA'}"
+              class="estado realizada">
+            REALIZADA
+        </span>
+
+        <span th:if="${cita.estado == 'CANCELADA'}"
+              class="estado cancelada">
+            CANCELADA
+        </span>
+    </td>
+
+    <td>
+        <span th:if="${cita.estado == 'PENDIENTE'}"
+              th:class="'riesgo ' + ${prediccion.riesgo(cita.usuario)}"
+              th:text="${prediccion.etiqueta(cita.usuario)} + ' · ' + ${prediccion.porcentaje(cita.usuario)} + '%'"
+              th:title="${prediccion.interpretacion(cita.usuario)}">
+            --
+        </span>
+
+        <span th:unless="${cita.estado == 'PENDIENTE'}">
+            ---
+        </span>
+    </td>
+
+    <td class="acciones">
+
+        <span th:if="${cita.estado == 'PENDIENTE'}">
+
+            <a th:href="@{/realizarCita/{id}(id=${cita.id})}"
+               class="btn realizada">
+                Finalizar
+            </a>
+
+        </span>
+
+        <span th:if="${cita.estado != 'PENDIENTE'}">
+            ---
+        </span>
+
+    </td>
 
 </tr>
 
 </table>
+
+<!-- NAVEGACIÓN ENTRE PÁGINAS -->
+<div class="paginacion" th:if="${citas.totalPages > 1}">
+
+    <!-- ANTERIOR -->
+    <a th:if="${citas.hasPrevious()}"
+       th:href="@{/banco/citas(
+            page=${citas.number - 1},
+            size=${tamanioPagina},
+            tipo=${tipoSeleccionado},
+            cedula=${cedulaBusqueda}
+       )}">
+        ❮
+    </a>
+
+    <span th:unless="${citas.hasPrevious()}"
+          class="pagina-desactivada">
+        ❮
+    </span>
+
+    <!-- PRIMERA PÁGINA -->
+    <a th:if="${paginaInicio > 0}"
+       th:href="@{/banco/citas(
+            page=0,
+            size=${tamanioPagina},
+            tipo=${tipoSeleccionado},
+            cedula=${cedulaBusqueda}
+       )}">
+        1
+    </a>
+
+    <span th:if="${paginaInicio > 1}">
+        ...
+    </span>
+
+    <!-- NÚMEROS DE PÁGINA -->
+    <a th:each="numero : ${#numbers.sequence(paginaInicio, paginaFin)}"
+       th:href="@{/banco/citas(
+            page=${numero},
+            size=${tamanioPagina},
+            tipo=${tipoSeleccionado},
+            cedula=${cedulaBusqueda}
+       )}"
+       th:text="${numero + 1}"
+       th:classappend="${numero == citas.number} ? ' pagina-activa' : ''">
+    </a>
+
+    <!-- ÚLTIMA PÁGINA -->
+    <span th:if="${paginaFin < citas.totalPages - 2}">
+        ...
+    </span>
+
+    <a th:if="${paginaFin < citas.totalPages - 1}"
+       th:href="@{/banco/citas(
+            page=${citas.totalPages - 1},
+            size=${tamanioPagina},
+            tipo=${tipoSeleccionado},
+            cedula=${cedulaBusqueda}
+       )}"
+       th:text="${citas.totalPages}">
+    </a>
+
+    <!-- SIGUIENTE -->
+    <a th:if="${citas.hasNext()}"
+       th:href="@{/banco/citas(
+            page=${citas.number + 1},
+            size=${tamanioPagina},
+            tipo=${tipoSeleccionado},
+            cedula=${cedulaBusqueda}
+       )}">
+        ❯
+    </a>
+
+    <span th:unless="${citas.hasNext()}"
+          class="pagina-desactivada">
+        ❯
+    </span>
+
+</div>
+
+<!-- INFORMACIÓN DE REGISTROS -->
+<p class="informacion-paginacion">
+
+    Mostrando
+    <strong th:text="${desde}">0</strong>
+    -
+    <strong th:text="${hasta}">0</strong>
+    de
+    <strong th:text="${contador}">0</strong>
+    citas
+
+</p>
 
 </div>
 
