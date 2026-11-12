@@ -26,3 +26,5 @@ public interface CitaRepository extends MongoRepository<Cita, String> {
     Page<Cita> findByTipoSangreIgnoreCaseAndUsuarioContainingIgnoreCase(
             String tipoSangre, String usuario, Pageable pageable);
 }
+
+
