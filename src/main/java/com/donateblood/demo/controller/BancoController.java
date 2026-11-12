@@ -1,9 +1,13 @@
+
 package com.donateblood.demo.controller;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.donateblood.demo.model.Cita;
 import com.donateblood.demo.ml.Prediccion;
 import com.donateblood.demo.repository.CitaRepository;
 import com.donateblood.demo.repository.DonacionRepository;
@@ -59,7 +64,8 @@ public class BancoController {
             RedirectAttributes redirectAttributes) {
 
         if (cantidad <= 0) {
-            redirectAttributes.addFlashAttribute("error", "La cantidad debe ser mayor que cero");
+            redirectAttributes.addFlashAttribute("error",
+                    "La cantidad debe ser mayor que cero");
 
             if ("admin".equals(origen)) {
                 return "redirect:/admin/modificar";
@@ -70,7 +76,8 @@ public class BancoController {
         int actual = unidadesSangre.getOrDefault(tipo, 0);
         unidadesSangre.put(tipo, actual + cantidad);
 
-        redirectAttributes.addFlashAttribute("mensaje", "Unidades modificadas correctamente");
+        redirectAttributes.addFlashAttribute("mensaje",
+                "Unidades modificadas correctamente");
 
         if ("admin".equals(origen)) {
             return "redirect:/admin/unidades";
@@ -81,7 +88,9 @@ public class BancoController {
 
     @GetMapping("/capacidad")
     public String verCapacidad(Authentication auth, Model model) {
-        model.addAttribute("capacidad", capacidadService.capacidadDeUsername(auth.getName()));
+        model.addAttribute("capacidad",
+                capacidadService.capacidadDeUsername(auth.getName()));
+
         model.addAttribute("maxima", CapacidadService.CAPACIDAD_MAXIMA);
         return "banco_capacidad";
     }
@@ -94,8 +103,11 @@ public class BancoController {
 
         try {
             capacidadService.actualizarCapacidad(auth.getName(), capacidad);
+
             redirectAttributes.addFlashAttribute("mensaje",
-                    "Capacidad de atención actualizada: " + capacidad + " donantes por hora");
+                    "Capacidad de atención actualizada: "
+                            + capacidad + " donantes por hora");
+
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -110,35 +122,138 @@ public class BancoController {
         return "banco_donantes";
     }
 
+    // CONSULTA PAGINADA DE CITAS
     @GetMapping("/citas")
     public String verCitas(
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) String cedula,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size,
             Model model) {
 
-        List<com.donateblood.demo.model.Cita> citas = citaRepository.findAll();
-
-        if (tipo != null && !tipo.isEmpty()) {
-            citas = citas.stream()
-                    .filter(c -> c.getTipoSangre() != null && c.getTipoSangre().equalsIgnoreCase(tipo))
-                    .collect(Collectors.toList());
+        // Solo se permiten estos tamaños de página
+        if (size != 25 && size != 50 && size != 100) {
+            size = 25;
         }
 
-        if (cedula != null && !cedula.isEmpty()) {
-            String cedulaLower = cedula.toLowerCase();
-            citas = citas.stream()
-                    .filter(c -> c.getUsuario() != null && c.getUsuario().toLowerCase().contains(cedulaLower))
-                    .collect(Collectors.toList());
+        // Evitar páginas negativas
+        page = Math.max(0, page);
+
+        // Limpiar los filtros vacíos
+        String tipoFiltro = (tipo == null || tipo.isBlank())
+                ? null : tipo.trim();
+
+        String usuarioFiltro = (cedula == null || cedula.isBlank())
+                ? null : cedula.trim();
+
+        // Ordenar las citas por fecha y hora
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.ASC, "fecha")
+                        .and(Sort.by(Sort.Direction.ASC, "hora"))
+        );
+
+        // Consultar las citas aplicando los filtros
+        Page<Cita> citas = buscarCitas(
+                tipoFiltro,
+                usuarioFiltro,
+                pageable
+        );
+
+        // Si la página solicitada ya no existe,
+        // regresar a la última página disponible
+        if (citas.getTotalPages() > 0
+                && page >= citas.getTotalPages()) {
+
+            page = citas.getTotalPages() - 1;
+
+            pageable = PageRequest.of(
+                    page,
+                    size,
+                    Sort.by(Sort.Direction.ASC, "fecha")
+                            .and(Sort.by(Sort.Direction.ASC, "hora"))
+            );
+
+            citas = buscarCitas(
+                    tipoFiltro,
+                    usuarioFiltro,
+                    pageable
+            );
         }
 
-        model.addAttribute("prediccion", Prediccion.desde(citaRepository.findAll()));
+        // Se conserva el cálculo original de la predicción
+        model.addAttribute(
+                "prediccion",
+                Prediccion.desde(citaRepository.findAll())
+        );
 
         model.addAttribute("citas", citas);
-        model.addAttribute("tipoSeleccionado", tipo == null ? "" : tipo);
-        model.addAttribute("cedulaBusqueda", cedula == null ? "" : cedula);
-        model.addAttribute("contador", citas.size());
+
+        model.addAttribute("tipoSeleccionado",
+                tipoFiltro == null ? "" : tipoFiltro);
+
+        model.addAttribute("cedulaBusqueda",
+                usuarioFiltro == null ? "" : usuarioFiltro);
+
+        model.addAttribute("contador", citas.getTotalElements());
+
+        model.addAttribute("tamanioPagina", size);
+
+        // Calcular el rango de registros mostrados
+        long desde = citas.getTotalElements() == 0
+                ? 0
+                : (long) citas.getNumber() * size + 1;
+
+        long hasta = desde == 0
+                ? 0
+                : desde + citas.getNumberOfElements() - 1;
+
+        model.addAttribute("desde", desde);
+        model.addAttribute("hasta", hasta);
+
+        // Mostrar un máximo de cinco números de página
+        int paginaInicio = Math.max(0, citas.getNumber() - 2);
+
+        int paginaFin = Math.min(
+                citas.getTotalPages() - 1,
+                paginaInicio + 4
+        );
+
+        paginaInicio = Math.max(0, paginaFin - 4);
+
+        model.addAttribute("paginaInicio", paginaInicio);
+        model.addAttribute("paginaFin", paginaFin);
 
         return "banco_citas";
+    }
+
+    // CONSULTA DE CITAS CON FILTROS Y PAGINACIÓN
+    private Page<Cita> buscarCitas(
+            String tipo,
+            String usuario,
+            Pageable pageable) {
+
+        if (tipo != null && usuario != null) {
+
+            return citaRepository
+                    .findByTipoSangreIgnoreCaseAndUsuarioContainingIgnoreCase(
+                            tipo, usuario, pageable);
+
+        } else if (tipo != null) {
+
+            return citaRepository
+                    .findByTipoSangreIgnoreCase(tipo, pageable);
+
+        } else if (usuario != null) {
+
+            return citaRepository
+                    .findByUsuarioContainingIgnoreCase(usuario, pageable);
+
+        } else {
+
+            return citaRepository.findAll(pageable);
+        }
     }
 
     @PostMapping("/pedidos")
@@ -152,7 +267,8 @@ public class BancoController {
 
         if (stockActual == null || stockActual < cantidad) {
 
-            redirectAttributes.addFlashAttribute("error", "Cantidad insuficiente de sangre tipo " + tipo);
+            redirectAttributes.addFlashAttribute("error",
+                    "Cantidad insuficiente de sangre tipo " + tipo);
 
             if ("admin".equals(origen)) {
                 return "redirect:/admin/pedidos";
@@ -163,7 +279,8 @@ public class BancoController {
 
         unidadesSangre.put(tipo, stockActual - cantidad);
 
-        redirectAttributes.addFlashAttribute("mensaje", "Pedido enviado con éxito");
+        redirectAttributes.addFlashAttribute("mensaje",
+                "Pedido enviado con éxito");
 
         if ("admin".equals(origen)) {
             return "redirect:/admin/pedidos";
