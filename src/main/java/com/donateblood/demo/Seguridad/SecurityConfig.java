@@ -20,6 +20,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
@@ -75,6 +81,7 @@ public class SecurityConfig {
 
             .csrf(csrf -> csrf
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .ignoringRequestMatchers("/api/**")
             )
 
             .sessionManagement(session ->
@@ -88,6 +95,7 @@ public class SecurityConfig {
                         "/",
                         "/info",
                         "/api/bancos",
+                        "/api/auth/**",
 
                         "/login",
                         "/register",
@@ -103,6 +111,8 @@ public class SecurityConfig {
                         "/oauth2/**",
                         "/login/oauth2/**"
                 ).permitAll()
+
+                .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
 
                 .requestMatchers("/admin/**").hasRole("ADMIN")
 
@@ -127,6 +137,10 @@ public class SecurityConfig {
             )
 
             .userDetailsService(customUserDetailsService)
+
+            .exceptionHandling(ex -> ex.defaultAuthenticationEntryPointFor(
+                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                    request -> request.getServletPath().startsWith("/api/")))
 
             .formLogin(form -> form
                 .loginPage("/login")
@@ -161,6 +175,25 @@ public class SecurityConfig {
         );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration api = new CorsConfiguration();
+        api.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+        api.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        api.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+
+        // conserva el comportamiento de @CrossOrigin("*") de EncargoController
+        CorsConfiguration encargos = new CorsConfiguration();
+        encargos.setAllowedOrigins(List.of("*"));
+        encargos.setAllowedMethods(List.of("*"));
+        encargos.setAllowedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", api);
+        source.registerCorsConfiguration("/encargos/**", encargos);
+        return source;
     }
 
     @Bean
