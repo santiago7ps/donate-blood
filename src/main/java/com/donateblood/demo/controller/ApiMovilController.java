@@ -68,6 +68,7 @@ public class ApiMovilController {
         m.put("documento", u.getDocumento());
         m.put("numPhone", u.getNumPhone());
         m.put("edad", u.getEdad());
+        m.put("tipoSangre", u.getTipoSangre());
         m.put("email", u.getEmail());
         return m;
     }
@@ -77,7 +78,7 @@ public class ApiMovilController {
     public record RegistroRequest(
             String nombre, String username, String tipoDocumento, String documento,
             String numPhone, Integer edad, String email,
-            String password, String confirmPassword) {}
+            String password, String confirmPassword, String tipoSangre) {}
 
     @PostMapping("/auth/register")
     public ResponseEntity<?> registrar(@RequestBody RegistroRequest r) {
@@ -95,6 +96,9 @@ public class ApiMovilController {
             errores.put("edad", "Usted es menor de edad, por lo tanto no puede donar");
         else if (r.edad() > 120)
             errores.put("edad", "Ingresa una edad válida");
+        if (r.tipoSangre() != null && !r.tipoSangre().isBlank()
+                && !Arrays.asList(CitasYSangre.TIPOS_SANGRE).contains(r.tipoSangre().trim()))
+            errores.put("tipoSangre", "Selecciona un tipo de sangre válido");
         if (r.tipoDocumento() == null || r.tipoDocumento().isBlank())
             errores.put("tipoDocumento", "Selecciona el tipo de documento");
         if (r.documento() == null || !r.documento().trim().matches("\\d{6,15}"))
@@ -122,6 +126,7 @@ public class ApiMovilController {
         u.setDocumento(r.documento().trim());
         u.setNumPhone(r.numPhone());
         u.setEdad(r.edad());
+        if (r.tipoSangre() != null && !r.tipoSangre().isBlank()) u.setTipoSangre(r.tipoSangre().trim());
         u.setEmail(r.email().trim());
         u.setPassword(passwordEncoder.encode(r.password()));
         u.setRol("ROLE_USER"); // la app es solo para donantes
@@ -209,8 +214,10 @@ public class ApiMovilController {
 
         if (r.lugar() == null || r.lugar().isBlank())
             return error(HttpStatus.BAD_REQUEST, "Selecciona un banco de sangre");
-        if (r.tipoSangre() == null || !Arrays.asList(CitasYSangre.TIPOS_SANGRE).contains(r.tipoSangre()))
-            return error(HttpStatus.BAD_REQUEST, "Selecciona un tipo de sangre válido");
+        // El tipo de sangre sale del perfil del donante; solo si no lo tiene se usa el enviado
+        String sangre = (u.getTipoSangre() != null && !u.getTipoSangre().isBlank()) ? u.getTipoSangre() : r.tipoSangre();
+        if (sangre == null || !Arrays.asList(CitasYSangre.TIPOS_SANGRE).contains(sangre))
+            return error(HttpStatus.BAD_REQUEST, "Completa tu tipo de sangre en el perfil");
 
         try {
             LocalDate fecha = LocalDate.parse(r.fecha());
@@ -229,7 +236,7 @@ public class ApiMovilController {
         cita.setLugar(r.lugar());
         cita.setFecha(r.fecha());
         cita.setHora(r.hora());
-        cita.setTipoSangre(r.tipoSangre());
+        cita.setTipoSangre(sangre);
         cita.setEstado("PENDIENTE");
 
         if (!capacidadService.guardarSiHayCupo(cita)) {

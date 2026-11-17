@@ -1,0 +1,7 @@
+flask
+joblib
+pandas
+numpy
+# Tu modelo se guardo en Colab con scikit-learn 1.6.1. Debe ser LA MISMA version aqui,
+# si no, el modelo carga pero falla al predecir.
+scikit-learn==1.6.1

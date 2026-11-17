@@ -130,6 +130,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             usuario.setDocumento(digitos(random, 10));
             usuario.setNumPhone("3" + digitos(random, 9));
             usuario.setEdad(18 + random.nextInt(48)); // edad entre 18 y 65
+            usuario.setTipoSangre(CitasYSangre.TIPOS_SANGRE[Math.floorMod(username.hashCode(), CitasYSangre.TIPOS_SANGRE.length)]);
             usuario.setEmail(username + dominios[random.nextInt(dominios.length)]);
             usuario.setPassword(passwordCifrada);
             usuario.setRol("ROLE_USER");

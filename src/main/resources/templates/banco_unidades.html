@@ -15,7 +15,7 @@
     <a href="/banco/unidades" class="activo">🩸 Unidades disponibles</a>
     <a href="/banco/modificar">✏️ Modificar unidades</a>
     <a href="/banco/citas">📅 Ver citas</a>
-    <a href="/banco/capacidad">👩‍⚕️ Capacidad de atención</a>
+    <a href="/banco/capacidad">👩‍⚕️ Disponibilidad y horarios</a>
     <a href="/banco/prediccion">📈 Predicción de asistencia</a>
      <a href="/logout" class="salir">🚪 Salir</a>
     </div>
@@ -25,18 +25,24 @@
 
 <h1>Unidades disponibles</h1>
 
-<table>
+<div th:with="disponibles=${unidades.?[value gt 0]}">
+<div th:if="${#maps.isEmpty(disponibles)}" class="estado-vacio">
+    <span class="estado-vacio-icono">🩸</span>
+    <p>No hay unidades disponibles.</p>
+</div>
+<table th:unless="${#maps.isEmpty(disponibles)}">
 <tr>
 <th>Tipo</th>
 <th>Cantidad</th>
 </tr>
 
-<tr th:each="u : ${unidades}">
+<tr th:each="u : ${disponibles}">
 <td th:text="${u.key}"></td>
 <td th:text="${u.value}"></td>
 </tr>
 
 </table>
+</div>
 
 </div>
 

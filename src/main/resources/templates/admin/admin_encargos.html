@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encargos de los centros</title>
+<link rel="stylesheet" href="/css/sidebar.css">
+<link rel="stylesheet" href="/css/admin_gestion.css">
+</head>
+<body>
+
+<div class="sidebar">
+<h2>ADMIN</h2>
+<div class="menu">
+<a href="/admin/unidades">🩸 Unidades</a>
+<a href="/admin/modificar">✏️ Modificar</a>
+<a href="/admin/pedidos">📦 Pedidos</a>
+<a href="/admin/misCitas">📅 Citas</a>
+<a href="/admin/agendar">➕ Agendar</a>
+<a href="/admin/usuarios">👥 Usuarios</a>
+<a href="/admin/encargos" class="activo">🚚 Encargos</a>
+<a href="/logout" class="salir">🚪 Salir</a>
+</div>
+</div>
+
+<div class="contenido">
+
+<h1>Encargos de los centros</h1>
+<p>Revisa los encargos de sangre hechos por los centros médicos, cambia su estado o elimínalos.</p>
+
+<p th:if="${mensaje}" th:text="${mensaje}" class="success"></p>
+<p th:if="${error}" th:text="${error}" class="error"></p>
+
+<div th:if="${encargos.isEmpty()}" class="estado-vacio">
+    <span class="estado-vacio-icono">🚚</span>
+    <p>Todavía no hay encargos registrados.</p>
+</div>
+
+<table th:unless="${encargos.isEmpty()}">
+<thead>
+<tr>
+    <th>Centro médico</th>
+    <th>Banco</th>
+    <th>Tipo</th>
+    <th>Cantidad</th>
+    <th>Fecha</th>
+    <th>Estado</th>
+    <th>Acciones</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="e : ${encargos}">
+    <td th:text="${e.centroMedico}"></td>
+    <td th:text="${e.bancoSangre}"></td>
+    <td th:text="${e.tipoSangre}"></td>
+    <td th:text="${e.cantidad}"></td>
+    <td th:text="${e.fecha}"></td>
+    <td>
+        <span class="estado"
+              th:classappend="${e.estado == 'PENDIENTE'} ? 'pendiente' : (${e.estado == 'ENTREGADO'} ? 'realizada' : 'cancelada')"
+              th:text="${e.estado}"></span>
+    </td>
+    <td class="acciones">
+        <form th:action="@{/admin/encargos/{id}/estado(id=${e.id})}" method="post" class="inline">
+            <select name="estado" class="mini">
+                <option th:each="s : ${estados}" th:value="${s}" th:text="${s}"
+                        th:selected="${e.estado == s}"></option>
+            </select>
+            <button type="submit" class="btn-tabla">Actualizar</button>
+        </form>
+
+        <form th:action="@{/admin/encargos/{id}/eliminar(id=${e.id})}" method="post" class="inline"
+              onsubmit="return confirm('¿Eliminar este encargo? Esta acción no se puede deshacer.')">
+            <button type="submit" class="btn-tabla peligro">Eliminar</button>
+        </form>
+    </td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+</body>
+</html>

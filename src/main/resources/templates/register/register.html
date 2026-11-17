@@ -67,7 +67,7 @@
 
             <!-- CAMBIO 1: se agregó errorEdad -->
             <div class="alert alert-danger d-flex align-items-center gap-2"
-                 th:if="${errorNombre != null or errorDocumento != null or errorPhone != null or errorEdad != null or errorEmail != null or errorUsername != null or errorPassword != null or errorConfirm != null}">
+                 th:if="${errorNombre != null or errorDocumento != null or errorPhone != null or errorEdad != null or errorTipoSangre != null or errorEmail != null or errorUsername != null or errorPassword != null or errorConfirm != null}">
                 <i data-lucide="circle-alert"></i>
                 <span>Revisa los campos marcados antes de continuar.</span>
             </div>
@@ -134,6 +134,20 @@
                         </div>
                         <small class="field-error" th:if="${errorEdad}" th:text="${errorEdad}"></small>
                         <small class="field-error" id="edadErrorJs" style="display:none"></small>
+                    </div>
+
+                    <!-- Tipo de sangre, justo al lado de la edad -->
+                    <div class="field">
+                        <label for="tipoSangre">Tipo de sangre</label>
+                        <div class="input-wrap select-wrap">
+                            <i data-lucide="droplet"></i>
+                            <select id="tipoSangre" name="tipoSangre" required>
+                                <option value="" disabled th:selected="${usuario == null or usuario.tipoSangre == null}">Selecciona</option>
+                                <option th:each="t : ${tiposSangre}" th:value="${t}" th:text="${t}"
+                                        th:selected="${usuario != null and usuario.tipoSangre == t}"></option>
+                            </select>
+                        </div>
+                        <small class="field-error" th:if="${errorTipoSangre}" th:text="${errorTipoSangre}"></small>
                     </div>
 
                     <div class="field full-width">

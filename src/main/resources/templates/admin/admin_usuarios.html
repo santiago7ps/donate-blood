@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de usuarios</title>
+<link rel="stylesheet" href="/css/sidebar.css">
+<link rel="stylesheet" href="/css/admin_gestion.css">
+</head>
+<body>
+
+<div class="sidebar">
+<h2>ADMIN</h2>
+<div class="menu">
+<a href="/admin/unidades">🩸 Unidades</a>
+<a href="/admin/modificar">✏️ Modificar</a>
+<a href="/admin/pedidos">📦 Pedidos</a>
+<a href="/admin/misCitas">📅 Citas</a>
+<a href="/admin/agendar">➕ Agendar</a>
+<a href="/admin/usuarios" class="activo">👥 Usuarios</a>
+<a href="/admin/encargos">🚚 Encargos</a>
+<a href="/logout" class="salir">🚪 Salir</a>
+</div>
+</div>
+
+<div class="contenido">
+
+<h1>Gestión de usuarios</h1>
+<p>Administra donantes, bancos de sangre, centros médicos y administradores.</p>
+
+<p th:if="${mensaje}" th:text="${mensaje}" class="success"></p>
+<p th:if="${error}" th:text="${error}" class="error"></p>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">🩸</div>
+        <div>
+            <div class="stat-value" th:text="${cuentaDonantes}">0</div>
+            <div class="stat-label">Donantes</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🏦</div>
+        <div>
+            <div class="stat-value" th:text="${cuentaBancos}">0</div>
+            <div class="stat-label">Bancos de sangre</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🏥</div>
+        <div>
+            <div class="stat-value" th:text="${cuentaCentros}">0</div>
+            <div class="stat-label">Centros médicos</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🛡️</div>
+        <div>
+            <div class="stat-value" th:text="${cuentaAdmins}">0</div>
+            <div class="stat-label">Administradores</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs">
+    <a th:href="@{/admin/usuarios(q=${q})}"
+       th:classappend="${rolFiltro == ''} ? 'activo'"
+       th:text="'Todos (' + ${cuentaTodos} + ')'">Todos</a>
+    <a th:href="@{/admin/usuarios(rol='ROLE_USER',q=${q})}"
+       th:classappend="${rolFiltro == 'ROLE_USER'} ? 'activo'"
+       th:text="'Donantes (' + ${cuentaDonantes} + ')'">Donantes</a>
+    <a th:href="@{/admin/usuarios(rol='ROLE_BANCO',q=${q})}"
+       th:classappend="${rolFiltro == 'ROLE_BANCO'} ? 'activo'"
+       th:text="'Bancos (' + ${cuentaBancos} + ')'">Bancos</a>
+    <a th:href="@{/admin/usuarios(rol='ROLE_CENTRO',q=${q})}"
+       th:classappend="${rolFiltro == 'ROLE_CENTRO'} ? 'activo'"
+       th:text="'Centros (' + ${cuentaCentros} + ')'">Centros</a>
+    <a th:href="@{/admin/usuarios(rol='ROLE_ADMIN',q=${q})}"
+       th:classappend="${rolFiltro == 'ROLE_ADMIN'} ? 'activo'"
+       th:text="'Administradores (' + ${cuentaAdmins} + ')'">Administradores</a>
+</div>
+
+<form th:action="@{/admin/usuarios}" method="get" class="barra">
+    <input type="hidden" name="rol" th:value="${rolFiltro}">
+    <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, usuario, correo o documento">
+    <button type="submit">Buscar</button>
+    <a th:if="${q != ''}" th:href="@{/admin/usuarios(rol=${rolFiltro})}" class="btn-primary">Limpiar</a>
+    <span class="espacio"></span>
+    <a th:href="@{/admin/usuarios/nuevo(rol=${rolFiltro})}" class="btn-primary">➕ Nuevo usuario</a>
+</form>
+
+<div th:if="${usuarios.isEmpty()}" class="estado-vacio">
+    <span class="estado-vacio-icono">👥</span>
+    <p>No se encontraron usuarios con ese filtro.</p>
+</div>
+
+<table th:unless="${usuarios.isEmpty()}">
+<thead>
+<tr>
+    <th>Nombre</th>
+    <th>Usuario</th>
+    <th>Rol</th>
+    <th>Correo</th>
+    <th>Teléfono</th>
+    <th>Detalle</th>
+    <th>Acciones</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="u : ${usuarios}">
+    <td th:text="${u.nombre != null and u.nombre != '' ? u.nombre : '—'}"></td>
+    <td th:text="${u.username}"></td>
+    <td>
+        <span class="rol-badge"
+              th:classappend="${u.rol == 'ROLE_BANCO'} ? 'banco' : (${u.rol == 'ROLE_CENTRO'} ? 'centro' : (${u.rol == 'ROLE_ADMIN'} ? 'admin' : 'user'))"
+              th:text="${etiquetas[u.rol] != null ? etiquetas[u.rol] : u.rol}"></span>
+    </td>
+    <td th:text="${u.email != null and u.email != '' ? u.email : '—'}"></td>
+    <td th:text="${u.numPhone != null and u.numPhone != '' ? u.numPhone : '—'}"></td>
+    <td>
+        <span th:if="${u.rol == 'ROLE_USER'}"
+              th:text="${u.tipoSangre != null ? u.tipoSangre : '—'}"></span>
+        <span th:if="${u.rol == 'ROLE_BANCO'}"
+              th:text="${u.capacidadAtencion != null ? 'Capacidad ' + u.capacidadAtencion : 'Capacidad por defecto'}"></span>
+    </td>
+    <td class="acciones">
+        <a th:href="@{/admin/usuarios/{id}/editar(id=${u.id})}" class="btn editar">Editar</a>
+
+        <form th:if="${u.username != yo}"
+              th:action="@{/admin/usuarios/{id}/eliminar(id=${u.id})}"
+              th:attr="data-nombre=${u.username}"
+              method="post" class="inline"
+              onsubmit="return confirm('¿Eliminar a ' + this.dataset.nombre + '? Sus citas pendientes se cancelarán. Esta acción no se puede deshacer.')">
+            <button type="submit" class="btn-tabla peligro">Eliminar</button>
+        </form>
+        <span th:if="${u.username == yo}" class="tu-cuenta">(tu cuenta)</span>
+    </td>
+</tr>
+</tbody>
+</table>
+
+<div class="paginas" th:if="${totalPaginas > 1}">
+    <a th:if="${pagina > 0}" th:href="@{/admin/usuarios(rol=${rolFiltro},q=${q},page=${pagina - 1})}">← Anterior</a>
+    <span th:text="'Página ' + ${pagina + 1} + ' de ' + ${totalPaginas} + ' · ' + ${total} + ' resultados'"></span>
+    <a th:if="${pagina + 1 < totalPaginas}" th:href="@{/admin/usuarios(rol=${rolFiltro},q=${q},page=${pagina + 1})}">Siguiente →</a>
+</div>
+
+</div>
+
+</body>
+</html>

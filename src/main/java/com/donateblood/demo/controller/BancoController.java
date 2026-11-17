@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,27 +101,60 @@ public class BancoController {
     }
 
     @GetMapping("/capacidad")
-    public String verCapacidad(Authentication auth, Model model) {
-        model.addAttribute("capacidad",
-                capacidadService.capacidadDeUsername(auth.getName()));
+    public String verCapacidad(
+            @RequestParam(required = false) String fecha,
+            Authentication auth,
+            Model model) {
 
+        String username = auth.getName();
+
+        model.addAttribute("capacidad", capacidadService.capacidadDeUsername(username));
         model.addAttribute("maxima", CapacidadService.CAPACIDAD_MAXIMA);
+        model.addAttribute("dias", capacidadService.diasAtencionDe(username));
+        model.addAttribute("cupos", capacidadService.cuposConfigurados(username));
+        model.addAttribute("nombresDias", CapacidadService.DIAS_CORTOS);
+
+        // Vista de un día concreto: cupos, agendadas y libres por franja
+        LocalDate dia;
+        try {
+            dia = (fecha == null || fecha.isBlank())
+                    ? LocalDate.now(ZoneId.of("America/Bogota"))
+                    : LocalDate.parse(fecha);
+        } catch (Exception e) {
+            dia = LocalDate.now(ZoneId.of("America/Bogota"));
+        }
+        model.addAttribute("fechaVista", dia.toString());
+        model.addAttribute("franjasDia",
+                capacidadService.detalleHoras(capacidadService.lugarDe(username), dia.toString(), null));
+
         return "banco_capacidad";
     }
 
     @PostMapping("/capacidad")
     public String guardarCapacidad(
             @RequestParam int capacidad,
+            @RequestParam(required = false) List<Integer> dias,
+            @RequestParam Map<String, String> params,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
 
         try {
-            capacidadService.actualizarCapacidad(auth.getName(), capacidad);
+            // Los cupos de cada franja llegan como cupo_08:00, cupo_08:30, ...
+            Map<String, Integer> cupos = new LinkedHashMap<>();
+            for (String hora : CitasYSangre.franjasValidas()) {
+                String valor = params.get("cupo_" + hora);
+                if (valor != null && !valor.isBlank()) {
+                    cupos.put(hora, Integer.parseInt(valor.trim()));
+                }
+            }
+
+            capacidadService.actualizarDisponibilidad(auth.getName(), capacidad, dias, cupos);
 
             redirectAttributes.addFlashAttribute("mensaje",
-                    "Capacidad de atención actualizada: "
-                            + capacidad + " donantes por hora");
+                    "Disponibilidad actualizada: los donantes ya verán estos días y cupos al agendar");
 
+        } catch (NumberFormatException e) {
+            redirectAttributes.addFlashAttribute("error", "Los cupos deben ser números enteros");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }

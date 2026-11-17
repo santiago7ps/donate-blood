@@ -1,0 +1,174 @@
+/* Estilos adicionales para la gestión del administrador.
+   Se cargan junto a sidebar.css y solo usan sus variables; no modifican nada existente. */
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 18px;
+}
+
+.tabs a {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.tabs a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.tabs a.activo {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.barra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.contenido .barra input[type="text"] {
+    flex: 1;
+    min-width: 220px;
+    max-width: 420px;
+    margin: 0;
+}
+
+.contenido .barra button {
+    padding: 11px 22px;
+}
+
+.barra .espacio {
+    flex: 1;
+}
+
+/* Etiqueta de rol */
+.rol-badge {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    white-space: nowrap;
+}
+
+.rol-badge.banco  { background: var(--info-bg);    color: var(--info); }
+.rol-badge.centro { background: var(--success-bg); color: var(--success); }
+.rol-badge.admin  { background: var(--warning-bg); color: var(--warning); }
+
+/* Botones dentro de tablas */
+form.inline {
+    display: inline;
+}
+
+.contenido button.btn-tabla {
+    padding: 7px 14px;
+    font-size: 12.5px;
+    margin: 2px;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+}
+
+.contenido button.btn-tabla.peligro {
+    background: var(--danger);
+}
+
+.contenido button.btn-tabla.peligro:hover {
+    box-shadow: var(--shadow-sm);
+    background: var(--danger);
+}
+
+.contenido select.mini {
+    width: auto;
+    margin: 0;
+    padding: 7px 10px;
+    font-size: 13px;
+}
+
+.tu-cuenta {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    font-style: italic;
+}
+
+/* Paginación */
+.paginas {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.paginas a {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.paginas a:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Formulario de usuario */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px 22px;
+    max-width: 880px;
+    margin-bottom: 22px;
+}
+
+.campo label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.campo small {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.campo small.err {
+    color: var(--danger);
+    font-weight: 600;
+    font-size: 12.5px;
+}
+
+.contenido input[readonly] {
+    background: #eef0f3;
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.acciones-form {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}

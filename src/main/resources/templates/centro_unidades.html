@@ -28,17 +28,23 @@
 
     <h1>Unidades disponibles</h1>
 
-    <table>
+<div th:with="disponibles=${unidades.?[value gt 0]}">
+<div th:if="${#maps.isEmpty(disponibles)}" class="estado-vacio">
+    <span class="estado-vacio-icono">🩸</span>
+    <p>No hay unidades disponibles.</p>
+</div>
+    <table th:unless="${#maps.isEmpty(disponibles)}">
         <tr>
             <th>Tipo de sangre</th>
             <th>Cantidad</th>
         </tr>
 
-        <tr th:each="unidad : ${unidades}">
+        <tr th:each="unidad : ${disponibles}">
             <td th:text="${unidad.key}"></td>
             <td th:text="${unidad.value}"></td>
         </tr>
     </table>
+</div>
 
 </div>
 

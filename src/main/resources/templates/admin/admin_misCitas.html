@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="/css/sidebar.css">
+<link rel="stylesheet" href="/css/admin_gestion.css">
 </head>
 
 <body>
@@ -15,6 +16,8 @@
 <a href="/admin/pedidos">📦 Pedidos</a>
 <a href="/admin/misCitas" class="activo">📅 Citas</a>
 <a href="/admin/agendar">➕ Agendar</a>
+<a href="/admin/usuarios">👥 Usuarios</a>
+<a href="/admin/encargos">🚚 Encargos</a>
 <a href="/logout" class="salir">🚪 Salir</a>
 </div>
 </div>
@@ -22,6 +25,9 @@
 <div class="contenido">
 
 <h1>Citas</h1>
+
+<p th:if="${mensaje}" th:text="${mensaje}" class="success"></p>
+<p th:if="${error}" th:text="${error}" class="error"></p>
 
 <table>
 <tr>
@@ -69,6 +75,11 @@
     <span th:if="${c.estado != 'PENDIENTE'}">
         ---
     </span>
+
+    <form th:action="@{/admin/citas/{id}/eliminar(id=${c.id})}" method="post" class="inline"
+          onsubmit="return confirm('¿Eliminar esta cita definitivamente? Se perderá del historial.')">
+        <button type="submit" class="btn-tabla peligro">Eliminar</button>
+    </form>
 </td>
 
 </tr>

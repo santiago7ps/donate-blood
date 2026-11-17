@@ -1,5 +1,8 @@
 package com.donateblood.demo.model;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,12 +20,20 @@ public class Usuario {
     private String documento;
     private String numPhone;
     private Integer edad;
+    // Tipo de sangre del donante (A+, A-, B+, B-, O+, O-, AB+, AB-). Null en usuarios antiguos.
+    private String tipoSangre;
     private String email;
     private String password;
     private String rol;
 
     // Solo aplica a ROLE_BANCO: médicos/cuartos = donantes máximos por fecha y hora
     private Integer capacidadAtencion;
+
+    // Solo aplica a ROLE_BANCO: días que atiende (1 = lunes ... 7 = domingo). Null = todos los días.
+    private List<Integer> diasAtencion;
+
+    // Solo aplica a ROLE_BANCO: cupos por franja ("08:00" -> 4). Una franja ausente usa capacidadAtencion; 0 = franja cerrada.
+    private Map<String, Integer> cuposPorFranja;
 
     public Usuario(){}
 
@@ -88,6 +99,14 @@ public class Usuario {
         this.edad = edad;
     }
 
+    public String getTipoSangre() {
+        return tipoSangre;
+    }
+
+    public void setTipoSangre(String tipoSangre) {
+        this.tipoSangre = tipoSangre;
+    }
+
     public String getEmail() {
         return email;
     }
@@ -118,6 +137,22 @@ public class Usuario {
 
     public void setCapacidadAtencion(Integer capacidadAtencion) {
         this.capacidadAtencion = capacidadAtencion;
+    }
+
+    public List<Integer> getDiasAtencion() {
+        return diasAtencion;
+    }
+
+    public void setDiasAtencion(List<Integer> diasAtencion) {
+        this.diasAtencion = diasAtencion;
+    }
+
+    public Map<String, Integer> getCuposPorFranja() {
+        return cuposPorFranja;
+    }
+
+    public void setCuposPorFranja(Map<String, Integer> cuposPorFranja) {
+        this.cuposPorFranja = cuposPorFranja;
     }
 
     /** Un donante tiene el perfil completo cuando ya registró documento, teléfono y edad. */
