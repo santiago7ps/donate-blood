@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -8,6 +7,62 @@
 <link rel="stylesheet" href="/css/sidebar.css">
 
 <style>
+
+    /* ===== BARRA FIJA (se queda arriba al deslizar) ===== */
+    .barra-fija {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin: 0 -44px 8px;
+        padding: 12px 44px 10px;
+        background: rgba(244, 245, 247, 0.96);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 6px 14px rgba(16, 24, 40, 0.06);
+    }
+
+    .barra-fija form {
+        margin: 0;
+    }
+
+    /* Para que el encabezado de la tabla también se pueda fijar,
+       la tabla no puede tener overflow: hidden */
+    table {
+        overflow: visible;
+    }
+
+    th {
+        position: sticky;
+        top: calc(var(--alto-barra, 0px) - 1px);
+        z-index: 4;
+    }
+
+    th:first-child { border-top-left-radius: var(--radius); }
+    th:last-child  { border-top-right-radius: var(--radius); }
+
+    @media (max-width: 900px) {
+        .barra-fija {
+            margin: 0 -18px 8px;
+            padding: 12px 18px 10px;
+        }
+    }
+
+    /* En pantallas pequeñas la barra ocuparía demasiado espacio: no se fija */
+    @media (max-width: 700px) {
+        .barra-fija { position: static; box-shadow: none; }
+        th { position: static; }
+    }
+
+    /* Botón de recordatorio por correo */
+    .btn.recordatorio {
+        background: var(--info);
+    }
+
+    .barra-fija .resumen-citas {
+        margin: 6px 0 0;
+    }
+
     .resumen-citas {
         display: flex;
         justify-content: space-between;
@@ -120,10 +175,19 @@
 
 <h2>🩸 Citas Agendadas</h2>
 
+<!-- ENLACE A PREDICCIÓN -->
+<p style="margin-bottom: 15px;">
+    <a href="/banco/prediccion">
+        📈 Ver predicción de asistencia
+    </a>
+</p>
+
+<div class="barra-fija">
+
 <!-- FILTROS DE BÚSQUEDA -->
 <form method="get"
       action="/banco/citas"
-      style="margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+      style="margin-bottom: 0; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
 
     <div>
         <label for="tipo">Tipo de sangre</label><br>
@@ -148,14 +212,14 @@
     </div>
 
     <div>
-        <label for="cedula">Buscar por usuario</label><br>
+        <label for="nombre">Buscar por nombre completo</label><br>
 
         <input
-            id="cedula"
-            name="cedula"
+            id="nombre"
+            name="nombre"
             type="text"
-            placeholder="Nombre de usuario"
-            th:value="${cedulaBusqueda}"
+            placeholder="Ej. Luis Manuel Miranda Diaz"
+            th:value="${nombreBusqueda}"
             style="min-width: 220px;"
         />
     </div>
@@ -186,8 +250,8 @@
                    th:value="${tipoSeleccionado}">
 
             <input type="hidden"
-                   name="cedula"
-                   th:value="${cedulaBusqueda}">
+                   name="nombre"
+                   th:value="${nombreBusqueda}">
 
             <select id="cantidadPagina"
                     name="size"
@@ -218,12 +282,8 @@
 
 </div>
 
-<!-- ENLACE A PREDICCIÓN -->
-<p style="margin-bottom: 15px;">
-    <a href="/banco/prediccion">
-        📈 Ver predicción de asistencia
-    </a>
-</p>
+</div>
+<!-- FIN BARRA FIJA -->
 
 <!-- MENSAJE CUANDO NO EXISTEN CITAS -->
 <div th:if="${citas.empty}" class="estado-vacio">
@@ -244,7 +304,6 @@
     <th>Lugar</th>
     <th>Tipo de Sangre</th>
     <th>Estado</th>
-    <th>Prob. de asistir</th>
     <th>Acción</th>
 </tr>
 
@@ -277,19 +336,6 @@
         </span>
     </td>
 
-    <td>
-        <span th:if="${cita.estado == 'PENDIENTE'}"
-              th:class="'riesgo ' + ${prediccion.riesgo(cita.usuario)}"
-              th:text="${prediccion.etiqueta(cita.usuario)} + ' · ' + ${prediccion.porcentaje(cita.usuario)} + '%'"
-              th:title="${prediccion.interpretacion(cita.usuario)}">
-            --
-        </span>
-
-        <span th:unless="${cita.estado == 'PENDIENTE'}">
-            ---
-        </span>
-    </td>
-
     <td class="acciones">
 
         <span th:if="${cita.estado == 'PENDIENTE'}">
@@ -298,6 +344,21 @@
                class="btn realizada">
                 Finalizar
             </a>
+
+            <!-- RECORDATORIO: abre Gmail con el mensaje listo -->
+            <a th:if="${enlacesCorreo[cita.id] != null}"
+               th:href="${enlacesCorreo[cita.id]}"
+               target="_blank"
+               rel="noopener"
+               class="btn recordatorio"
+               title="Abrir Gmail con el recordatorio listo para enviar">
+                ✉️ Recordatorio
+            </a>
+
+            <span th:if="${enlacesCorreo[cita.id] == null}"
+                  class="no-disponible">
+                Sin correo
+            </span>
 
         </span>
 
@@ -320,7 +381,7 @@
             page=${citas.number - 1},
             size=${tamanioPagina},
             tipo=${tipoSeleccionado},
-            cedula=${cedulaBusqueda}
+            nombre=${nombreBusqueda}
        )}">
         ❮
     </a>
@@ -336,7 +397,7 @@
             page=0,
             size=${tamanioPagina},
             tipo=${tipoSeleccionado},
-            cedula=${cedulaBusqueda}
+            nombre=${nombreBusqueda}
        )}">
         1
     </a>
@@ -351,7 +412,7 @@
             page=${numero},
             size=${tamanioPagina},
             tipo=${tipoSeleccionado},
-            cedula=${cedulaBusqueda}
+            nombre=${nombreBusqueda}
        )}"
        th:text="${numero + 1}"
        th:classappend="${numero == citas.number} ? ' pagina-activa' : ''">
@@ -367,7 +428,7 @@
             page=${citas.totalPages - 1},
             size=${tamanioPagina},
             tipo=${tipoSeleccionado},
-            cedula=${cedulaBusqueda}
+            nombre=${nombreBusqueda}
        )}"
        th:text="${citas.totalPages}">
     </a>
@@ -378,7 +439,7 @@
             page=${citas.number + 1},
             size=${tamanioPagina},
             tipo=${tipoSeleccionado},
-            cedula=${cedulaBusqueda}
+            nombre=${nombreBusqueda}
        )}">
         ❯
     </a>
@@ -404,6 +465,22 @@
 </p>
 
 </div>
+
+<script>
+    // Calcula la altura de la barra fija para pegar debajo el encabezado de la tabla
+    (function () {
+        var barra = document.querySelector('.barra-fija');
+        if (!barra) return;
+        function ajustar() {
+            document.documentElement.style.setProperty('--alto-barra', barra.offsetHeight + 'px');
+        }
+        ajustar();
+        window.addEventListener('resize', ajustar);
+        if (window.ResizeObserver) {
+            new ResizeObserver(ajustar).observe(barra);
+        }
+    })();
+</script>
 
 </body>
 </html>

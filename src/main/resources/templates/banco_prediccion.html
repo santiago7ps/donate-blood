@@ -6,6 +6,68 @@
 <title>Predicción de asistencia</title>
 
 <link rel="stylesheet" href="/css/sidebar.css">
+
+<style>
+
+    /* ===== BARRA FIJA (se queda arriba al deslizar) ===== */
+    .barra-fija {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin: 0 -44px 8px;
+        padding: 12px 44px 10px;
+        background: rgba(244, 245, 247, 0.96);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 6px 14px rgba(16, 24, 40, 0.06);
+    }
+
+    .barra-fija form {
+        margin: 0;
+    }
+
+    /* Para que el encabezado de la tabla también se pueda fijar,
+       la tabla no puede tener overflow: hidden */
+    table {
+        overflow: visible;
+    }
+
+    th {
+        position: sticky;
+        top: calc(var(--alto-barra, 0px) - 1px);
+        z-index: 4;
+    }
+
+    th:first-child { border-top-left-radius: var(--radius); }
+    th:last-child  { border-top-right-radius: var(--radius); }
+
+    @media (max-width: 900px) {
+        .barra-fija {
+            margin: 0 -18px 8px;
+            padding: 12px 18px 10px;
+        }
+    }
+
+    /* En pantallas pequeñas la barra ocuparía demasiado espacio: no se fija */
+    @media (max-width: 700px) {
+        .barra-fija { position: static; box-shadow: none; }
+        th { position: static; }
+    }
+
+    .barra-fija .fila-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+        margin-top: 8px;
+    }
+
+    .barra-fija .fila-info p {
+        margin: 0;
+    }
+</style>
 </head>
 <body>
 
@@ -24,9 +86,10 @@
 
 <div class="contenido">
 
-<h1>📈 Predicción de asistencia</h1>
+<h1>📈 Predicción de donación</h1>
 
-<p>Estimamos si cada donante irá a su cita según cuántas de sus citas anteriores cumplió.</p>
+<p th:if="${usaModelo}">Un modelo entrenado con el historial de citas y donaciones estima la probabilidad de que cada cita pendiente termine en donación.</p>
+<p th:unless="${usaModelo}">Estimamos la probabilidad de que cada cita termine en donación según cuántas de sus citas anteriores cumplió el donante.</p>
 
 <div th:if="${total == 0}" class="estado-vacio">
     <span class="estado-vacio-icono">🩸</span>
@@ -36,29 +99,72 @@
 <div th:unless="${total == 0}">
 
     <div class="aviso">
-        De las <strong th:text="${total}">0</strong> citas pendientes próximas, se espera que asistan
+        De las <strong th:text="${total}">0</strong> citas pendientes actuales, se espera que terminen en donación
         unas <strong th:text="${esperadas}">0</strong>.
-        <strong th:text="${altos}">0</strong> son poco probables,
-        <strong th:text="${medios}">0</strong> son probables y
-        <strong th:text="${bajos}">0</strong> son muy probables.
+        <strong th:text="${altas}">0</strong> con probabilidad alta,
+        <strong th:text="${medias}">0</strong> con probabilidad media y
+        <strong th:text="${bajas}">0</strong> con probabilidad baja.
+        <br>
+        <small>Alta: <span th:text="${umbralAlta}">70</span> % o más ·
+        Media: de <span th:text="${umbralMedia}">40</span> % a menos de <span th:text="${umbralAlta}">70</span> % ·
+        Baja: menos de <span th:text="${umbralMedia}">40</span> %</small>
     </div>
 
-    <form method="get" action="/banco/prediccion" style="margin-bottom: 16px; display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-        <div>
-            <label for="buscar">Buscar donante</label><br>
-            <input id="buscar" name="buscar" type="text" placeholder="Nombre o usuario" th:value="${buscar}" style="min-width: 260px;" />
-        </div>
-        <div>
-            <button type="submit">Buscar</button>
-            <a href="/banco/prediccion" style="margin-left: 10px;">Limpiar</a>
-        </div>
-    </form>
-
-    <p style="margin-bottom: 12px;"><strong>Citas encontradas:</strong> <span th:text="${encontradas}">0</span>
-        <span th:if="${encontradas > maximo}" class="no-disponible">
-            · se muestran las <span th:text="${maximo}">100</span> con menor probabilidad; usa el buscador para ver una persona.
+    <div th:if="${usaModelo}" class="aviso">
+        📊 Pronóstico del modelo entrenado, con cerca de
+        <strong th:text="${precisionModelo}">66</strong>&nbsp;% de acierto: úsalo como ayuda para priorizar a quién contactar,
+        no como una decisión automática.
+        <span th:if="${conHistorial > 0}">
+            <strong th:text="${conHistorial}">0</strong> cita(s) con datos incompletos se calcularon solo con el historial del donante.
         </span>
-    </p>
+    </div>
+    <div th:unless="${usaModelo}" class="aviso">
+        ⚠️ El modelo entrenado no está disponible en este momento: se muestra una estimación simple según el historial del donante.
+    </div>
+
+    <div class="barra-fija">
+
+        <form method="get" action="/banco/prediccion" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+            <div>
+                <label for="buscar">Buscar por nombre completo</label><br>
+                <input id="buscar" name="buscar" type="text" placeholder="Ej. Luis Manuel Miranda Diaz" th:value="${buscar}" style="min-width: 260px;" />
+                <input type="hidden" name="tamanio" th:value="${tamanioPagina}">
+            </div>
+            <div>
+                <button type="submit">Buscar</button>
+                <a href="/banco/prediccion" style="margin-left: 10px;">Limpiar</a>
+            </div>
+        </form>
+
+        <div class="fila-info">
+
+            <p><strong>Citas encontradas:</strong> <span th:text="${encontradas}">0</span></p>
+
+            <p th:unless="${encontradas == 0}">
+                Mostrando <strong th:text="${desde}">1</strong> -
+                <strong th:text="${hasta}">25</strong> de
+                <strong th:text="${encontradas}">0</strong> citas.
+            </p>
+
+            <form th:unless="${encontradas == 0}"
+                  method="get" action="/banco/prediccion"
+                  style="display: flex; align-items: center; gap: 8px;">
+                <input type="hidden" name="buscar" th:value="${buscar}">
+                <label for="tamanio">Mostrar:</label>
+                <select id="tamanio" name="tamanio"
+                        onchange="this.form.submit()"
+                        style="width: 75px; min-width: 75px; padding: 7px 10px; margin: 0;">
+                    <option value="25" th:selected="${tamanioPagina == 25}">25</option>
+                    <option value="50" th:selected="${tamanioPagina == 50}">50</option>
+                    <option value="100" th:selected="${tamanioPagina == 100}">100</option>
+                </select>
+                <span>por página</span>
+            </form>
+
+        </div>
+
+    </div>
+    <!-- FIN BARRA FIJA -->
 
     <div th:if="${encontradas == 0}" class="estado-vacio">
         <span class="estado-vacio-icono">🔎</span>
@@ -69,22 +175,66 @@
     <tr>
         <th>Cita</th>
         <th>Qué significa</th>
-        <th>Resultado</th>
+        <th>Probabilidad de donar</th>
     </tr>
     <tr th:each="cita : ${pendientes}">
         <td>
             <strong th:text="${cita.nombre}"></strong><br>
             <span th:text="${cita.fecha} + ' · ' + ${cita.hora} + ' · ' + ${cita.lugar}"></span>
         </td>
-        <td th:text="${prediccion.interpretacion(cita.usuario)}"></td>
-        <td><span th:class="'riesgo ' + ${prediccion.riesgo(cita.usuario)}"
-                  th:text="${prediccion.etiqueta(cita.usuario)} + ' · ' + ${prediccion.porcentaje(cita.usuario)} + '%'"></span></td>
+        <td th:text="${resultados[cita.id].interpretacion}"></td>
+        <td><span th:class="'riesgo ' + ${resultados[cita.id].riesgo}"
+                  th:text="${resultados[cita.id].etiqueta} + ' · ' + ${resultados[cita.id].porcentaje} + '%'"></span></td>
     </tr>
     </table>
 
+    <div th:if="${totalPaginas > 1}"
+         style="display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin: 22px 0;">
+
+        <a th:if="${paginaActual > 0}"
+           th:href="@{/banco/prediccion(buscar=${buscar}, pagina=${paginaActual - 1}, tamanio=${tamanioPagina})}">
+            ❮ Anterior
+        </a>
+
+        <span th:each="i : ${#numbers.sequence(paginaInicio, paginaFin)}">
+            <strong th:if="${i == paginaActual}"
+                    th:text="${i + 1}"
+                    style="padding: 7px 11px; background: #b42332; color: white; border-radius: 5px;">
+            </strong>
+
+            <a th:unless="${i == paginaActual}"
+               th:href="@{/banco/prediccion(buscar=${buscar}, pagina=${i}, tamanio=${tamanioPagina})}"
+               th:text="${i + 1}"
+               style="padding: 7px 11px;">
+            </a>
+        </span>
+
+        <a th:if="${paginaActual < totalPaginas - 1}"
+           th:href="@{/banco/prediccion(buscar=${buscar}, pagina=${paginaActual + 1}, tamanio=${tamanioPagina})}">
+            Siguiente ❯
+        </a>
+    </div>
+
 </div>
 
 </div>
+
+<script>
+    // Calcula la altura de la barra fija para pegar debajo el encabezado de la tabla
+    (function () {
+        var barra = document.querySelector('.barra-fija');
+        if (!barra) return;
+        function ajustar() {
+            document.documentElement.style.setProperty('--alto-barra', barra.offsetHeight + 'px');
+        }
+        ajustar();
+        window.addEventListener('resize', ajustar);
+        if (window.ResizeObserver) {
+            new ResizeObserver(ajustar).observe(barra);
+        }
+    })();
+</script>
 
 </body>
 </html>
+
