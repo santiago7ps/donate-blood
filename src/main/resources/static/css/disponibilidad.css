@@ -1,0 +1,240 @@
+/* Selector de horas del donante y configuración de disponibilidad del banco */
+
+/* ---------- Información del banco ---------- */
+.info-banco {
+    display: none;
+    max-width: 520px;
+    margin: 6px 0 6px;
+    padding: 9px 14px;
+    background: var(--info-bg);
+    color: var(--info);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+}
+.info-banco.visible { display: block; }
+
+.paso-titulo {
+    margin: 22px 0 8px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 0.2px;
+}
+
+/* ---------- Tira de días ---------- */
+.dias-strip {
+    display: flex;
+    gap: 10px;
+    max-width: 780px;
+    padding: 4px 2px 10px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+}
+.contenido button.dia-card {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 92px;
+    padding: 10px 6px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    scroll-snap-align: start;
+    transition: border-color .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease), background .18s var(--ease);
+}
+.contenido button.dia-card::after { display: none; }
+.contenido button.dia-card:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow);
+    background: var(--surface);
+}
+.dia-card .dia-nombre { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); }
+.dia-card .dia-num { font-size: 16px; font-weight: 800; }
+.dia-card .dia-cupos { font-size: 12px; font-weight: 700; color: var(--success); }
+.contenido button.dia-card:disabled { cursor: not-allowed; background: #f3f4f6; box-shadow: none; opacity: .8; }
+.dia-card:disabled .dia-num, .dia-card:disabled .dia-nombre { color: #9ca3af; }
+.dia-card.lleno .dia-cupos { color: var(--danger); }
+.dia-card.cerrado .dia-cupos { color: #9ca3af; }
+.contenido button.dia-card.sel,
+.contenido button.dia-card.sel:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+}
+.otra-fecha { display: block; margin: 6px 0 0; }
+.contenido input[type="date"]#fecha { max-width: 260px; }
+
+/* ---------- Franjas horarias ---------- */
+.franjas-grupo { margin: 0 0 14px; max-width: 780px; }
+.franjas-grupo h4 {
+    margin: 0 0 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+}
+.franjas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.contenido button.franja {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    padding: 10px 12px;
+    text-align: left;
+    background: var(--surface);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease), background .18s var(--ease);
+}
+.contenido button.franja::after { display: none; }
+.contenido button.franja:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow);
+    background: var(--surface);
+}
+.franja .franja-hora { font-size: 14.5px; font-weight: 800; }
+.franja .franja-cupos { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
+.franja .franja-barra {
+    display: block;
+    height: 5px;
+    margin-top: 4px;
+    border-radius: 4px;
+    background: #eceef2;
+    overflow: hidden;
+}
+.franja .franja-barra i { display: block; height: 100%; border-radius: 4px; background: var(--success); }
+
+.franja.pocos .franja-cupos { color: var(--warning); }
+.franja.pocos .franja-barra i { background: var(--warning); }
+
+.contenido button.franja:disabled {
+    cursor: not-allowed;
+    box-shadow: none;
+    background: #f3f4f6;
+    color: #9ca3af;
+    opacity: .85;
+}
+.franja:disabled .franja-cupos { color: #9ca3af; }
+.franja.llena:disabled .franja-cupos { color: var(--danger); }
+.franja.llena:disabled .franja-barra i { background: var(--danger); }
+
+.contenido button.franja.sel,
+.contenido button.franja.sel:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.leyenda { display: flex; flex-wrap: wrap; gap: 14px; margin: 4px 0 6px; font-size: 12.5px; color: var(--text-muted); }
+.leyenda span::before {
+    content: "";
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 6px;
+    border-radius: 50%;
+    vertical-align: -1px;
+}
+.leyenda .l-ok::before { background: var(--success); }
+.leyenda .l-pocos::before { background: var(--warning); }
+.leyenda .l-llena::before { background: var(--danger); }
+.leyenda .l-cerrada::before { background: #c4c8d0; }
+
+.aviso-horas { min-height: 20px; margin: 6px 0 10px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+.aviso-horas.alerta { color: var(--danger); }
+
+/* ---------- Configuración del banco ---------- */
+.contenido form.form-ancho { max-width: 860px; }
+
+.cfg-bloque {
+    margin: 0 0 22px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+.cfg-bloque h3 { margin: 0 0 4px; font-size: 16px; }
+.cfg-bloque > p { margin: 0 0 12px; color: var(--text-muted); font-size: 13.5px; }
+
+.cfg-base { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.cfg-base .campo { width: 150px; }
+.contenido button.secundario {
+    background: var(--surface);
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    box-shadow: none;
+    padding: 11px 18px;
+}
+.contenido button.secundario:hover { background: var(--primary-soft); box-shadow: none; }
+
+.dias-semana { display: flex; flex-wrap: wrap; gap: 8px; }
+.dia-chip { position: relative; }
+.dia-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.dia-chip span {
+    display: inline-block;
+    min-width: 54px;
+    padding: 9px 14px;
+    text-align: center;
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    background: #fbfbfc;
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .18s var(--ease);
+}
+.dia-chip input:checked + span { background: var(--primary); border-color: var(--primary); color: #fff; }
+.dia-chip input:focus-visible + span { box-shadow: 0 0 0 4px var(--primary-soft); }
+
+.cupos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.cupo-item label { display: block; font-size: 12.5px; margin-bottom: 2px; }
+.cupo-item small { font-weight: 500; color: #9ca3af; }
+.cupos-subtitulo { margin: 12px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-muted); font-weight: 800; }
+.cupo-item input.cupo-input { margin: 2px 0 0; }
+
+.resumen-capacidad {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    background: var(--success-bg);
+    color: var(--success);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+/* ---------- Vista por día del banco ---------- */
+.vista-fecha { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.vista-fecha .campo { width: 190px; }
+
+.barra-ocupacion { display: inline-block; width: 110px; height: 8px; border-radius: 6px; background: #eceef2; overflow: hidden; vertical-align: middle; }
+.barra-ocupacion i { display: block; height: 100%; background: var(--success); }
+.barra-ocupacion.pocos i { background: var(--warning); }
+.barra-ocupacion.llena i { background: var(--danger); }
+
+.badge-franja { padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 800; letter-spacing: .3px; text-transform: uppercase; }
+.badge-franja.disponible { background: var(--success-bg); color: var(--success); }
+.badge-franja.pocos { background: var(--warning-bg); color: var(--warning); }
+.badge-franja.llena { background: var(--danger-bg); color: var(--danger); }
+.badge-franja.cerrada, .badge-franja.pasada { background: #f0f1f4; color: #6b7280; }
+
+@media (max-width: 900px) {
+    .franjas { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    .cupos-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+}

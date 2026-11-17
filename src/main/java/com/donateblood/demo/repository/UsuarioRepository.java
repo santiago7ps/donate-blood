@@ -23,4 +23,9 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     Usuario findFirstByRolAndNombre(String rol, String nombre);
 
     void deleteByRol(String rol);
+
+    // --- Usados por el panel de administración ---
+    long countByRol(String rol);
+
+    List<Usuario> findAllByEmailIgnoreCase(String email);
 }

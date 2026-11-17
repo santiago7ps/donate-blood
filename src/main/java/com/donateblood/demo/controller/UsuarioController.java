@@ -2,6 +2,7 @@ package com.donateblood.demo.controller;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.donateblood.demo.model.Usuario;
 import com.donateblood.demo.model.Cita;
 import com.donateblood.demo.repository.UsuarioRepository;
 import com.donateblood.demo.repository.CitaRepository;
+import com.donateblood.demo.util.CitasYSangre;
 
 @Controller
 public class UsuarioController {
@@ -36,12 +38,17 @@ public class UsuarioController {
         return "ROLE_USER";
     }
 
+    private boolean tipoSangreValido(String tipo) {
+        return tipo != null && Arrays.asList(CitasYSangre.TIPOS_SANGRE).contains(tipo.trim());
+    }
+
     @GetMapping("/register")
     public String mostrarRegistro(@RequestParam(required = false) String rol, Model model) {
 
         rol = validarRolPublico(rol);
 
         model.addAttribute("rol", rol);
+        model.addAttribute("tiposSangre", CitasYSangre.TIPOS_SANGRE);
 
         if ("ROLE_CENTRO".equals(rol) || "ROLE_BANCO".equals(rol)) {
             return "register/register";
@@ -61,6 +68,7 @@ public class UsuarioController {
 
         model.addAttribute("rol", rol);
         model.addAttribute("usuario", usuario);
+        model.addAttribute("tiposSangre", CitasYSangre.TIPOS_SANGRE);
 
         boolean hayError = false;
 
@@ -93,6 +101,11 @@ public class UsuarioController {
                 hayError = true;
             }
             // ======================================
+
+            if (!tipoSangreValido(usuario.getTipoSangre())) {
+                model.addAttribute("errorTipoSangre", "Selecciona tu tipo de sangre");
+                hayError = true;
+            }
 
             if (usuario.getDocumento() == null || !usuario.getDocumento().trim().matches("\\d{6,15}")) {
                 model.addAttribute("errorDocumento", "El número de documento debe tener entre 6 y 15 dígitos");
@@ -207,6 +220,7 @@ public class UsuarioController {
         }
 
         model.addAttribute("usuario", usuario);
+        model.addAttribute("tiposSangre", CitasYSangre.TIPOS_SANGRE);
         return "completarPerfil";
     }
 
@@ -217,6 +231,7 @@ public class UsuarioController {
             @RequestParam(required = false) String documento,
             @RequestParam(required = false) String numPhone,
             @RequestParam(required = false) Integer edad,
+            @RequestParam(required = false) String tipoSangre,
             Model model,
             Authentication auth) {
 
@@ -258,6 +273,12 @@ public class UsuarioController {
             hayError = true;
         }
 
+        String sangreLimpia = tipoSangre == null ? "" : tipoSangre.trim();
+        if (!tipoSangreValido(sangreLimpia)) {
+            model.addAttribute("errorTipoSangre", "Selecciona tu tipo de sangre");
+            hayError = true;
+        }
+
         if (hayError) {
             // Se devuelve lo que escribió (sin guardar) para que no tenga que repetirlo
             usuario.setNombre(nombreLimpio);
@@ -265,7 +286,9 @@ public class UsuarioController {
             usuario.setDocumento(docLimpio);
             usuario.setNumPhone(telLimpio);
             usuario.setEdad(edad);
+            usuario.setTipoSangre(sangreLimpia.isEmpty() ? null : sangreLimpia);
             model.addAttribute("usuario", usuario);
+            model.addAttribute("tiposSangre", CitasYSangre.TIPOS_SANGRE);
             return "completarPerfil";
         }
 
@@ -274,6 +297,7 @@ public class UsuarioController {
         usuario.setDocumento(docLimpio);
         usuario.setNumPhone(telLimpio);
         usuario.setEdad(edad);
+        usuario.setTipoSangre(sangreLimpia);
         usuarioRepo.save(usuario);
 
         return "redirect:/donantePanel";

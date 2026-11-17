@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Capacidad de atención</title>
+<title>Disponibilidad y horarios</title>
 
 <link rel="stylesheet" href="/css/sidebar.css">
+<link rel="stylesheet" href="/css/disponibilidad.css">
 </head>
 <body>
 
@@ -16,7 +17,7 @@
         <a href="/banco/unidades">🩸 Unidades disponibles</a>
         <a href="/banco/modificar">✏️ Modificar unidades</a>
         <a href="/banco/citas">📅 Ver citas</a>
-        <a href="/banco/capacidad" class="activo">👩‍⚕️ Capacidad de atención</a>
+        <a href="/banco/capacidad" class="activo">👩‍⚕️ Disponibilidad y horarios</a>
         <a href="/banco/prediccion">📈 Predicción de asistencia</a>
         <a href="/logout" class="salir">🚪 Salir</a>
     </div>
@@ -24,25 +25,143 @@
 
 <div class="contenido">
 
-<h1>Capacidad de atención</h1>
+<h1>Disponibilidad y horarios</h1>
 
-<p>Número de médicos o cuartos disponibles. Es la cantidad máxima de donantes que pueden
-   agendar la misma fecha y hora en tu banco.</p>
+<p>Define qué días atiende tu banco y cuántos donantes puedes recibir en cada franja de 30 minutos.
+   Los donantes solo verán y podrán reservar lo que configures aquí.</p>
 
 <p th:if="${mensaje}" th:text="${mensaje}" class="success"></p>
 <p th:if="${error}" th:text="${error}" class="error"></p>
 
-<form action="/banco/capacidad" method="POST" class="form-angosto">
+<form action="/banco/capacidad" method="POST" class="form-ancho" id="form-disponibilidad">
 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-<label for="capacidad">Donantes por hora:</label><br>
-<input type="number" id="capacidad" name="capacidad" min="1" th:max="${maxima}" step="1"
-       th:value="${capacidad}" required>
+    <!-- 1. Capacidad base -->
+    <div class="cfg-bloque">
+        <h3>1. Capacidad base</h3>
+        <p>Número de médicos o cuartos disponibles. Es el cupo que se usa en las franjas que no ajustes abajo.</p>
+        <div class="cfg-base">
+            <div class="campo">
+                <label for="capacidad">Donantes por franja</label>
+                <input type="number" id="capacidad" name="capacidad" min="1" th:max="${maxima}" step="1"
+                       th:value="${capacidad}" required>
+            </div>
+            <button type="button" class="secundario" id="aplicar-base">Aplicar a todas las franjas</button>
+        </div>
+    </div>
 
-<button type="submit">Guardar</button>
+    <!-- 2. Días de atención -->
+    <div class="cfg-bloque">
+        <h3>2. Días de atención</h3>
+        <p>Los días sin marcar aparecerán como cerrados para los donantes.</p>
+        <div class="dias-semana">
+            <label class="dia-chip" th:each="d : ${#numbers.sequence(1, 7)}">
+                <input type="checkbox" name="dias" th:value="${d}" th:checked="${dias.contains(d)}">
+                <span th:text="${nombresDias[d - 1]}"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 3. Cupos por franja -->
+    <div class="cfg-bloque">
+        <h3>3. Cupos por hora</h3>
+        <p>Ajusta cuántos donantes atiendes en cada franja. Pon <strong>0</strong> para cerrarla (por ejemplo, si hay menos personal por la tarde).</p>
+
+        <div class="cupos-subtitulo">Mañana</div>
+        <div class="cupos-grid">
+            <div class="cupo-item" th:each="e : ${cupos}" th:if="${e.key.compareTo('12:00') lt 0}">
+                <label th:for="${'cupo_' + e.key}" th:text="${e.key}"></label>
+                <input type="number" class="cupo-input" min="0" th:max="${maxima}" step="1" required
+                       th:id="${'cupo_' + e.key}" th:name="${'cupo_' + e.key}" th:value="${e.value}">
+            </div>
+        </div>
+
+        <div class="cupos-subtitulo">Tarde</div>
+        <div class="cupos-grid">
+            <div class="cupo-item" th:each="e : ${cupos}" th:if="${e.key.compareTo('12:00') ge 0}">
+                <label th:for="${'cupo_' + e.key}" th:text="${e.key}"></label>
+                <input type="number" class="cupo-input" min="0" th:max="${maxima}" step="1" required
+                       th:id="${'cupo_' + e.key}" th:name="${'cupo_' + e.key}" th:value="${e.value}">
+            </div>
+        </div>
+
+        <div class="resumen-capacidad" id="resumen-capacidad"></div>
+    </div>
+
+    <button type="submit">Guardar disponibilidad</button>
 </form>
 
+<!-- Vista de un día: cupos, agendadas y libres por hora -->
+<h2 style="margin-top:36px;">Ocupación por día</h2>
+
+<form action="/banco/capacidad" method="GET" class="vista-fecha">
+    <div class="campo">
+        <label for="fecha-vista">Fecha</label>
+        <input type="date" id="fecha-vista" name="fecha" th:value="${fechaVista}">
+    </div>
+    <button type="submit">Ver</button>
+</form>
+
+<table>
+    <tr>
+        <th>Hora</th>
+        <th>Cupos</th>
+        <th>Agendadas</th>
+        <th>Libres</th>
+        <th>Ocupación</th>
+        <th>Estado</th>
+    </tr>
+    <tr th:each="f : ${franjasDia}">
+        <td th:text="${f.hora + ' – ' + f.fin}"></td>
+        <td th:text="${f.capacidad}"></td>
+        <td th:text="${f.ocupados}"></td>
+        <td th:text="${f.libres}"></td>
+        <td>
+            <span class="barra-ocupacion" th:classappend="${f.estado == 'LLENA' ? 'llena' : (f.estado == 'POCOS' ? 'pocos' : '')}">
+                <i th:style="${'width:' + (f.capacidad > 0 ? (f.ocupados * 100 / f.capacidad > 100 ? 100 : f.ocupados * 100 / f.capacidad) : 0) + '%'}"></i>
+            </span>
+        </td>
+        <td>
+            <span class="badge-franja"
+                  th:classappend="${#strings.toLowerCase(f.estado)}"
+                  th:text="${f.estado == 'DISPONIBLE' ? 'Disponible' : (f.estado == 'POCOS' ? 'Pocos cupos' : (f.estado == 'LLENA' ? 'Llena' : (f.estado == 'CERRADA' ? 'Cerrada' : 'Pasó')))}"></span>
+        </td>
+    </tr>
+</table>
+
 </div>
+
+<script>
+(function () {
+    var base = document.getElementById('capacidad');
+    var inputs = document.querySelectorAll('.cupo-input');
+    var dias = document.querySelectorAll('input[name="dias"]');
+    var resumen = document.getElementById('resumen-capacidad');
+
+    function recalcular() {
+        var porDia = 0, abiertas = 0;
+        for (var i = 0; i < inputs.length; i++) {
+            var v = parseInt(inputs[i].value, 10) || 0;
+            porDia += v;
+            if (v > 0) abiertas++;
+        }
+        var diasAbiertos = 0;
+        for (var j = 0; j < dias.length; j++) if (dias[j].checked) diasAbiertos++;
+        resumen.textContent = 'Capacidad total: ' + porDia + ' donantes por día de atención (' + abiertas +
+            ' franjas abiertas) · ' + (porDia * diasAbiertos) + ' por semana en ' + diasAbiertos +
+            (diasAbiertos === 1 ? ' día.' : ' días.');
+    }
+
+    document.getElementById('aplicar-base').addEventListener('click', function () {
+        for (var i = 0; i < inputs.length; i++) inputs[i].value = base.value;
+        recalcular();
+    });
+
+    for (var i = 0; i < inputs.length; i++) inputs[i].addEventListener('input', recalcular);
+    for (var j = 0; j < dias.length; j++) dias[j].addEventListener('change', recalcular);
+    recalcular();
+})();
+</script>
 
 </body>
 </html>

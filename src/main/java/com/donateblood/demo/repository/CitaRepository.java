@@ -14,6 +14,9 @@ public interface CitaRepository extends MongoRepository<Cita, String> {
 
     List<Cita> findByLugarAndFecha(String lugar, String fecha);
 
+    // Usado por el panel de administración (renombrar / eliminar bancos)
+    List<Cita> findByLugar(String lugar);
+
     // Consultas paginadas por tipo de sangre
     Page<Cita> findByTipoSangreIgnoreCase(
             String tipoSangre, Pageable pageable);

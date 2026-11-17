@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.donateblood.demo.ml.Recordatorio;
 import com.donateblood.demo.model.Cita;
+import com.donateblood.demo.model.Usuario;
 import com.donateblood.demo.repository.CitaRepository;
 import com.donateblood.demo.repository.UsuarioRepository;
 import com.donateblood.demo.service.CapacidadService;
@@ -71,6 +73,32 @@ public class CitaController {
         return usuarioActual != null && usuarioActual.equals(cita.getUsuario());
     }
 
+    /** Perfil del donante dueño de la cita (o null si no existe, p. ej. citas creadas por el administrador). */
+    private Usuario perfilDe(String username) {
+        if (username == null) return null;
+        List<Usuario> encontrados = usuarioRepository.findAllByUsername(username);
+        return encontrados.isEmpty() ? null : encontrados.get(0);
+    }
+
+    private String sangreDePerfil(Usuario perfil) {
+        return (perfil != null && perfil.getTipoSangre() != null && !perfil.getTipoSangre().isBlank())
+                ? perfil.getTipoSangre()
+                : null;
+    }
+
+    private boolean tipoSangreValido(String tipo) {
+        return tipo != null && Arrays.asList(CitasYSangre.TIPOS_SANGRE).contains(tipo);
+    }
+
+    /** "banco-cerrado" u "hora-pasada" si la franja no se puede reservar por esos motivos; null en otro caso. */
+    private String errorDeFranja(Cita cita, String excluirId) {
+        CapacidadService.FranjaInfo f = capacidadService.franja(cita.getLugar(), cita.getFecha(), cita.getHora(), excluirId);
+        if (f == null) return null;
+        if ("CERRADA".equals(f.estado())) return "banco-cerrado";
+        if ("PASADA".equals(f.estado())) return "hora-pasada";
+        return null;
+    }
+
     @GetMapping("/agendarCita")
     public String mostrarFormulario(
             @RequestParam(required = false) String error,
@@ -80,6 +108,17 @@ public class CitaController {
             Model model) {
         model.addAttribute("cita", new Cita());
         model.addAttribute("bancos", usuarioRepository.findByRol("ROLE_BANCO"));
+
+        // El tipo de sangre y el nombre salen del perfil del donante
+        Usuario perfil = perfilDe(obtenerUsuarioActual());
+        model.addAttribute("tipoSangrePerfil", sangreDePerfil(perfil));
+        model.addAttribute("nombrePerfil", perfil == null ? null : perfil.getNombre());
+        model.addAttribute("tiposSangre", CitasYSangre.TIPOS_SANGRE);
+
+        // Si se vuelve de un error, se conserva el banco y la fecha elegidos
+        model.addAttribute("lugarSel", lugar);
+        model.addAttribute("fechaSel", fecha);
+
         agregarAvisoCupo(model, error, lugar, fecha, hora, null);
         return "agendarCita";
     }
@@ -101,7 +140,7 @@ public class CitaController {
                 + "&hora=" + UriUtils.encode(String.valueOf(cita.getHora()), StandardCharsets.UTF_8);
     }
 
-    /** Horas del banco en esa fecha con los cupos que les quedan (lo consume agendarCita.html). */
+    /** Franjas del banco en esa fecha con capacidad, ocupación y estado (lo consume el selector de horas). */
     @GetMapping("/disponibilidad")
     @ResponseBody
     public List<Map<String, Object>> disponibilidad(
@@ -109,14 +148,43 @@ public class CitaController {
             @RequestParam String fecha,
             @RequestParam(required = false) String excluir) {
 
-        return capacidadService.cuposPorHora(lugar, fecha, excluir).entrySet().stream()
-                .map(e -> {
+        return capacidadService.detalleHoras(lugar, fecha, excluir).stream()
+                .map(f -> {
                     Map<String, Object> fila = new LinkedHashMap<>();
-                    fila.put("hora", e.getKey());
-                    fila.put("libres", e.getValue());
+                    fila.put("hora", f.hora());
+                    fila.put("fin", f.fin());
+                    fila.put("capacidad", f.capacidad());
+                    fila.put("ocupados", f.ocupados());
+                    fila.put("libres", f.libres());
+                    fila.put("estado", f.estado());
                     return fila;
                 })
                 .collect(Collectors.toList());
+    }
+
+    /** Próximos 14 días del banco con sus cupos totales (tira de fechas del formulario). */
+    @GetMapping("/disponibilidad/dias")
+    @ResponseBody
+    public List<Map<String, Object>> diasDisponibles(@RequestParam String lugar) {
+        LocalDate hoy = LocalDate.now(ZoneId.of("America/Bogota"));
+        return capacidadService.resumenDias(lugar, hoy, 14).stream()
+                .map(d -> {
+                    Map<String, Object> fila = new LinkedHashMap<>();
+                    fila.put("fecha", d.fecha());
+                    fila.put("libres", d.libres());
+                    fila.put("estado", d.estado());
+                    return fila;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /** Datos generales del banco para mostrar junto al selector (días que atiende). */
+    @GetMapping("/disponibilidad/resumen")
+    @ResponseBody
+    public Map<String, Object> resumenBanco(@RequestParam String lugar) {
+        Map<String, Object> resumen = new LinkedHashMap<>();
+        resumen.put("dias", capacidadService.diasTexto(lugar));
+        return resumen;
     }
 
     @PostMapping("/agendarCita")
@@ -127,12 +195,30 @@ public class CitaController {
 
         cita.setEstado("PENDIENTE");
 
+        // El tipo de sangre siempre viene del perfil; solo quien no tiene perfil (p. ej. el admin) lo elige
+        Usuario perfil = perfilDe(usuario);
+        String sangrePerfil = sangreDePerfil(perfil);
+        if (sangrePerfil != null) {
+            cita.setTipoSangre(sangrePerfil);
+        } else if (!tipoSangreValido(cita.getTipoSangre())) {
+            return "redirect:/agendarCita?error=sangre-invalida";
+        }
+        // El nombre también viene del perfil cuando existe
+        if (perfil != null && perfil.getNombre() != null && !perfil.getNombre().isBlank()) {
+            cita.setNombre(perfil.getNombre());
+        }
+
         if (!CitasYSangre.horaValida(cita.getHora())) {
             return "redirect:/agendarCita?error=hora-invalida";
         }
 
         if (fechaPasada(cita.getFecha())) {
             return "redirect:/agendarCita?error=fecha-pasada";
+        }
+
+        String errorFranja = errorDeFranja(cita, null);
+        if (errorFranja != null) {
+            return "redirect:/agendarCita?error=" + errorFranja;
         }
 
         if (!capacidadService.guardarSiHayCupo(cita)) {
@@ -211,6 +297,12 @@ public class CitaController {
 
         model.addAttribute("bancos", usuarioRepository.findByRol("ROLE_BANCO"));
 
+        // Si el dueño de la cita tiene perfil, su tipo de sangre es automático
+        Usuario duenio = perfilDe(cita.getUsuario());
+        model.addAttribute("tipoSangrePerfil", sangreDePerfil(duenio));
+        model.addAttribute("nombrePerfil", duenio == null ? null : duenio.getNombre());
+        model.addAttribute("tiposSangre", CitasYSangre.TIPOS_SANGRE);
+
         agregarAvisoCupo(model, error, lugar, fecha, hora, id);
 
         return "editarCita";
@@ -242,9 +334,36 @@ public class CitaController {
             cita.setEstado("PENDIENTE");
             cita.setUsuario(existente.getUsuario());
 
-            // Al editar, la propia cita no cuenta contra el cupo de su hora actual
-            if (!capacidadService.guardarSiHayCupo(cita)) {
-                return redirectCupoLleno("/editarCita/" + cita.getId(), cita);
+            Usuario duenio = perfilDe(existente.getUsuario());
+            if (duenio != null && duenio.getNombre() != null && !duenio.getNombre().isBlank()) {
+                cita.setNombre(duenio.getNombre());
+            }
+
+            // El tipo de sangre sigue al perfil del dueño; sin perfil se respeta lo enviado (o lo que ya tenía)
+            String sangrePerfil = sangreDePerfil(duenio);
+            if (sangrePerfil != null) {
+                cita.setTipoSangre(sangrePerfil);
+            } else if (!tipoSangreValido(cita.getTipoSangre())) {
+                cita.setTipoSangre(existente.getTipoSangre());
+            }
+
+            boolean mismoHorario = Objects.equals(cita.getLugar(), existente.getLugar())
+                    && Objects.equals(cita.getFecha(), existente.getFecha())
+                    && Objects.equals(cita.getHora(), existente.getHora());
+
+            if (mismoHorario) {
+                // La cita ya ocupa su propio cupo: no se vuelve a validar (aunque el banco haya cambiado su capacidad)
+                citaRepository.save(cita);
+            } else {
+                String errorFranja = errorDeFranja(cita, cita.getId());
+                if (errorFranja != null) {
+                    return "redirect:/editarCita/" + cita.getId() + "?error=" + errorFranja;
+                }
+
+                // Al editar, la propia cita no cuenta contra el cupo de su hora actual
+                if (!capacidadService.guardarSiHayCupo(cita)) {
+                    return redirectCupoLleno("/editarCita/" + cita.getId(), cita);
+                }
             }
         }
 

@@ -16,6 +16,8 @@
 <a href="/admin/pedidos">📦 Pedidos</a>
 <a href="/admin/misCitas">📅 Citas</a>
 <a href="/admin/agendar">➕ Agendar</a>
+<a href="/admin/usuarios">👥 Usuarios</a>
+<a href="/admin/encargos">🚚 Encargos</a>
 <a href="/logout" class="salir">🚪 Salir</a>
 </div>
 </div>
@@ -23,7 +25,12 @@
 <div class="contenido">
 <h1>Unidades</h1>
 
-<table>
+<div th:with="disponibles=${unidades.?[value gt 0]}">
+<div th:if="${#maps.isEmpty(disponibles)}" class="estado-vacio">
+    <span class="estado-vacio-icono">🩸</span>
+    <p>No hay unidades disponibles.</p>
+</div>
+<table th:unless="${#maps.isEmpty(disponibles)}">
 <thead>
 <tr>
 <th>Tipo</th>
@@ -32,12 +39,13 @@
 </thead>
 
 <tbody>
-<tr th:each="u : ${unidades}">
+<tr th:each="u : ${disponibles}">
 <td th:text="${u.key}"></td>
 <td th:text="${u.value}"></td>
 </tr>
 </tbody>
 </table>
+</div>
 
 </div>
 

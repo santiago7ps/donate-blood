@@ -57,6 +57,14 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 4px var(--primary-soft);
         }
+        .fila-doble {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 14px;
+        }
+        .fila-doble label {
+            display: block;
+        }
         .panel-container button {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #fff;
@@ -110,9 +118,22 @@
                inputmode="numeric" pattern="\d{10}" maxlength="10" placeholder="10 dígitos" required>
         <p class="error" th:if="${errorPhone}" th:text="${errorPhone}"></p>
 
-        <label for="edad">Edad</label>
-        <input type="number" id="edad" name="edad" th:value="${usuario.edad}" min="18" max="120" required>
-        <p class="error" th:if="${errorEdad}" th:text="${errorEdad}"></p>
+        <div class="fila-doble">
+            <div>
+                <label for="edad">Edad</label>
+                <input type="number" id="edad" name="edad" th:value="${usuario.edad}" min="18" max="120" required>
+                <p class="error" th:if="${errorEdad}" th:text="${errorEdad}"></p>
+            </div>
+            <div>
+                <label for="tipoSangre">Tipo de sangre</label>
+                <select id="tipoSangre" name="tipoSangre" required>
+                    <option value="" disabled th:selected="${usuario.tipoSangre == null}">Selecciona</option>
+                    <option th:each="t : ${tiposSangre}" th:value="${t}" th:text="${t}"
+                            th:selected="${usuario.tipoSangre == t}"></option>
+                </select>
+                <p class="error" th:if="${errorTipoSangre}" th:text="${errorTipoSangre}"></p>
+            </div>
+        </div>
 
         <button type="submit">Guardar y continuar</button>
     </form>
